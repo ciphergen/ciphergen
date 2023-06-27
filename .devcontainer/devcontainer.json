@@ -1,0 +1,45 @@
+{
+	"name": "Development Container",
+	"build": {
+		"dockerfile": "Dockerfile"
+	},
+	"features": {
+		"ghcr.io/devcontainers/features/common-utils:2.0.10": {
+			"version": "latest",
+			"username": "automatic",
+			"userUid": "automatic",
+			"userGid": "automatic",
+			"configureZshAsDefaultShell": "true",
+            "upgradePackages": "true",
+            "installOhMyZsh": "true",
+            "installZsh": "true"
+		},
+		"ghcr.io/devcontainers/features/git:1.1.5": {
+			"version": "latest"
+		},
+		"ghcr.io/devcontainers/features/git-lfs:1.1.0": {
+			"version": "latest",
+            "autoPull": "false"
+		},
+		"ghcr.io/devcontainers/features/rust:1.0.11": {
+			"version": "latest",
+			"profile": "complete"
+		}
+	},
+	"mounts": [
+		{
+			"source": "${devcontainerId}-cargo",
+			"target": "/usr/local/cargo",
+			"type": "volume"
+		}
+	],
+	"containerEnv": {},
+	"containerUser": "vscode",
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"ms-vscode.makefile-tools"
+			]
+		}
+	}
+}
