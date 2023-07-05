@@ -1,8 +1,10 @@
-use rand::Rng;
+mod generate;
+
+use std::io::Write;
+
 use clap::{Parser, Subcommand, Args};
 use log::LevelFilter::{Warn, Info, Debug};
-use rand::distributions::{Alphanumeric, Uniform, Standard, DistString};
-use rand::seq::IteratorRandom;
+use crate::generate::{generate_binary, generate_password, generate_passphrase, generate_username, generate_hexadecimal};
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None, arg_required_else_help = true)]
@@ -18,43 +20,44 @@ struct Arguments {
 #[derive(Args)]
 #[group(multiple = false)]
 struct Verbosity {
-    #[arg(short, long, help = "Enable verbose output")]
+    #[arg(short = 'v', long = "verbose", help = "Enable verbose output")]
     verbose: bool,
 
-    #[arg(short, long, help = "Suppress informational messages")]
+    #[arg(short = 'q', long = "quiet", help = "Suppress informational messages")]
     quiet: bool
 }
 
 #[derive(Subcommand)]
 enum Commands {
-    /// Create a new secret key
-    Create {
+    /// Generate a new secret key or username
+    Generate {
         #[command(subcommand)]
-        command: Option<CreateCommands>
+        command: Option<GenerateCommands>
     }
 }
 
 #[derive(Subcommand)]
-enum CreateCommands {
+enum GenerateCommands {
+    /// Generate a random sequence of bytes
     Binary {
+        #[arg(short = 'H', long = "hexadecimal", help = "Output binary data in hexadecimal format")]
+        hexadecimal: bool,
         length: u16
     },
+    /// Generate a random password
     Password {
-        #[arg(short, long, help = "Use every available Unicode code point")]
+        #[arg(short = 'e', long = "expanded", help = "Use every available Unicode code point")]
         expanded: bool,
         length: u16
     },
+    /// Generate a random passphrase
     Passphrase {
         length: u16
+    },
+    /// Generate a random username
+    Username {
+        length: u16
     }
-}
-
-fn to_hex_string(bytes: Vec<u8>) -> String {
-    let hex_chars: Vec<String> = bytes
-        .iter()
-        .map(|byte| format!("{:02X}", byte))
-        .collect();
-    hex_chars.join("")
 }
 
 fn main() {
@@ -74,41 +77,36 @@ fn main() {
     builder.init();
 
     match &arguments.command {
-        Some(Commands::Create { command }) => {
+        Some(Commands::Generate { command }) => {
             match command {
-                Some(CreateCommands::Binary { length }) => {
-                    let range = Uniform::new(u8::MIN, u8::MAX);
-                    let bytes: Vec<u8> = rand::thread_rng()
-                        .sample_iter(range)
-                        .take(*length as usize)
-                        .collect();
-                    let hex = to_hex_string(bytes);
+                Some(GenerateCommands::Binary { hexadecimal, length }) => {
+                    if *hexadecimal {
+                        let hex = generate_hexadecimal(length);
 
-                    println!("{}", hex);
-                }
-                Some(CreateCommands::Password { length, expanded }) => {
-                    let password: String = if *expanded {
-                        rand::thread_rng()
-                            .sample_iter::<char, Standard>(Standard)
-                            .take(*length as usize)
-                            .map(char::from)
-                            .collect()
+                        println!("{}", hex);
                     }
                     else {
-                        Alphanumeric.sample_string(&mut rand::thread_rng(), *length as usize)
-                    };
+                        let bytes = generate_binary(length);
+                        let mut stdout = std::io::stdout();
+
+                        stdout.write_all(&bytes).unwrap();
+                        stdout.flush().unwrap();
+                    }
+                }
+                Some(GenerateCommands::Password { expanded, length }) => {
+                    let password = generate_password(expanded, length);
 
                     println!("{}", password)
                 }
-                Some(CreateCommands::Passphrase { length }) => {
-                    let wordlist = include_str!("wordlist.txt").to_string();
-                    let passphrase = wordlist
-                        .split('\n')
-                        .map(|value| value.to_string())
-                        .choose_multiple(&mut rand::thread_rng(), *length as usize)
-                        .join(" ");
+                Some(GenerateCommands::Passphrase { length }) => {
+                    let passphrase = generate_passphrase(length);
 
                     println!("{}", passphrase);
+                }
+                Some(GenerateCommands::Username { length }) => {
+                    let username = generate_username(length);
+
+                    println!("{}", username);
                 }
                 None => {}
             }
