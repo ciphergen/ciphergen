@@ -1,4 +1,5 @@
-mod generate;
+pub mod generate;
+pub mod tests;
 
 use std::io::Write;
 
