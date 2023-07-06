@@ -62,8 +62,8 @@ pub fn generate_username(length: &u16) -> String {
     let mut characters: Vec<char> = Vec::new();
     let rng = &mut rand::thread_rng();
 
-    for _ in 0..*length {
-        if rng.gen_bool(1.0 / 2.0) {
+    for index in 0..*length {
+        if index % 2 == 0 {
             characters.push(
                 *vowels.choose(rng).unwrap()
             );

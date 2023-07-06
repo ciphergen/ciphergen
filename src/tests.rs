@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod generate_tests {
-    use crate::generate::{generate_binary, generate_hexadecimal, generate_password, generate_passphrase};
+    use crate::generate::{generate_binary, generate_hexadecimal, generate_password, generate_passphrase, generate_username};
 
     #[test]
     fn can_generate_eight_random_bytes() {
@@ -50,6 +50,16 @@ mod generate_tests {
         assert_eq!(
             count,
             4
+        )
+    }
+
+    #[test]
+    fn can_generate_eight_character_username() {
+        let username = generate_username(&8);
+
+        assert_eq!(
+            username.chars().count(),
+            8
         )
     }
 }
