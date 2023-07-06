@@ -5,7 +5,7 @@ use std::io::Write;
 
 use clap::{Parser, Subcommand, Args};
 use log::LevelFilter::{Warn, Info, Debug};
-use crate::generate::{generate_binary, generate_password, generate_passphrase, generate_username, generate_hexadecimal};
+use crate::generate::{generate_binary, generate_password, generate_passphrase, generate_username, generate_hexadecimal, generate_pin};
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None, arg_required_else_help = true)]
@@ -58,6 +58,10 @@ enum GenerateCommands {
     /// Generate a random username
     Username {
         length: u16
+    },
+    /// Generate a random PIN
+    Pin {
+        length: u16
     }
 }
 
@@ -97,7 +101,7 @@ fn main() {
                 Some(GenerateCommands::Password { expanded, length }) => {
                     let password = generate_password(expanded, length);
 
-                    println!("{}", password)
+                    println!("{}", password);
                 }
                 Some(GenerateCommands::Passphrase { length }) => {
                     let passphrase = generate_passphrase(length);
@@ -108,6 +112,11 @@ fn main() {
                     let username = generate_username(length);
 
                     println!("{}", username);
+                }
+                Some(GenerateCommands::Pin { length }) => {
+                    let pin = generate_pin(length);
+
+                    println!("{}", pin);
                 }
                 None => {}
             }

@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod generate_tests {
-    use crate::generate::{generate_binary, generate_hexadecimal, generate_password, generate_passphrase, generate_username};
+    use crate::generate::{generate_binary, generate_hexadecimal, generate_password, generate_passphrase, generate_username, generate_pin};
 
     #[test]
     fn can_generate_eight_random_bytes() {
@@ -10,6 +10,12 @@ mod generate_tests {
             bytes.len(),
             8
         )
+    }
+
+    #[test]
+    #[should_panic]
+    fn invalid_bytes_length_fails() {
+        generate_binary(&0);
     }
 
     #[test]
@@ -30,6 +36,12 @@ mod generate_tests {
             password.chars().count(),
             8
         )
+    }
+
+    #[test]
+    #[should_panic]
+    fn invalid_password_length_fails() {
+        generate_password(&false, &0);
     }
 
     #[test]
@@ -54,6 +66,12 @@ mod generate_tests {
     }
 
     #[test]
+    #[should_panic]
+    fn invalid_passphrase_length_fails() {
+        generate_passphrase(&0);
+    }
+
+    #[test]
     fn can_generate_eight_character_username() {
         let username = generate_username(&8);
 
@@ -61,5 +79,27 @@ mod generate_tests {
             username.chars().count(),
             8
         )
+    }
+
+    #[test]
+    #[should_panic]
+    fn invalid_username_length_fails() {
+        generate_username(&0);
+    }
+
+    #[test]
+    fn can_generate_six_digit_pin() {
+        let pin = generate_pin(&6);
+
+        assert_eq!(
+            pin.to_string().chars().count(),
+            6
+        )
+    }
+
+    #[test]
+    #[should_panic]
+    fn invalid_pin_length_fails() {
+        generate_pin(&0);
     }
 }
