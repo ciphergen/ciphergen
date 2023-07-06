@@ -21,10 +21,10 @@ struct Arguments {
 #[derive(Args)]
 #[group(multiple = false)]
 struct Verbosity {
-    #[arg(short = 'v', long = "verbose", help = "Enable verbose output")]
+    #[arg(short = 'v', long = "verbose", help = "Enable verbose output", global = true)]
     verbose: bool,
 
-    #[arg(short = 'q', long = "quiet", help = "Suppress informational messages")]
+    #[arg(short = 'q', long = "quiet", help = "Suppress informational messages", global = true)]
     quiet: bool
 }
 
