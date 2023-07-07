@@ -1,19 +1,17 @@
 # Introduction
 
-CipherGen is a native Rust program that provides a command-line interface (CLI) for generating cryptographically-secure secret keys, such as passwords and passphrases.
+CipherGen is a native Rust program that provides a command-line interface (CLI) for generating cryptographically-secure secret keys, such as passwords and passphrases, as well as random pronounceable usernames.
 
-# Recommendations
+# Usage
 
-The following are recommended settings to use when generating secret keys:
+To generate an eight-character password, use the following command:
 
-## Binary
+```sh
+ciphergen generate password 8
+```
 
-At least sixteen bytes are recommended.
+# Build
 
-## Password
-
-A password length of at least 8 characters is recommended.
-
-## Passphrase
-
-A passphrase length of at least 4 words is recommended.
+```sh
+cargo build
+```
