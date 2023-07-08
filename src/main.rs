@@ -1,11 +1,17 @@
-pub mod generate;
-pub mod tests;
+mod generators;
 
 use std::io::Write;
 
 use clap::{Parser, Subcommand, Args};
 use log::LevelFilter::{Warn, Info, Debug};
-use crate::generate::{generate_binary, generate_password, generate_passphrase, generate_username, generate_hexadecimal, generate_pin};
+use generators::{
+    generate_binary,
+    generate_hexadecimal,
+    generate_password,
+    generate_passphrase,
+    generate_username,
+    generate_pin
+};
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None, arg_required_else_help = true)]
