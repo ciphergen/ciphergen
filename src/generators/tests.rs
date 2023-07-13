@@ -2,6 +2,7 @@
 use super::{
     generate_binary,
     generate_hexadecimal,
+    generate_base64,
     generate_password,
     generate_passphrase,
     generate_username,
@@ -10,7 +11,7 @@ use super::{
 
 #[test]
 fn can_generate_eight_random_bytes() {
-    let bytes = generate_binary(&8);
+    let bytes = generate_binary(&8).unwrap();
 
     assert_eq!(
         bytes.len(),
@@ -21,12 +22,12 @@ fn can_generate_eight_random_bytes() {
 #[test]
 #[should_panic]
 fn invalid_bytes_length_fails() {
-    generate_binary(&0);
+    generate_binary(&0).unwrap();
 }
 
 #[test]
 fn can_generate_eight_random_bytes_in_hex() {
-    let hex = generate_hexadecimal(&8);
+    let hex = generate_hexadecimal(&8).unwrap();
 
     assert_eq!(
         hex.chars().count(),
@@ -35,8 +36,18 @@ fn can_generate_eight_random_bytes_in_hex() {
 }
 
 #[test]
+fn can_generate_eight_random_bytes_in_base64() {
+    let base64 = generate_base64(&8).unwrap();
+
+    assert_eq!(
+        base64.chars().count(),
+        12
+    )
+}
+
+#[test]
 fn can_generate_eight_character_password() {
-    let password = generate_password(&true, &8);
+    let password = generate_password(&true, &8).unwrap();
 
     assert_eq!(
         password.chars().count(),
@@ -47,12 +58,12 @@ fn can_generate_eight_character_password() {
 #[test]
 #[should_panic]
 fn invalid_password_length_fails() {
-    generate_password(&false, &0);
+    generate_password(&false, &0).unwrap();
 }
 
 #[test]
 fn can_generate_eight_character_ascii_password() {
-    let password = generate_password(&false, &8);
+    let password = generate_password(&false, &8).unwrap();
 
     assert_eq!(
         password.chars().count(),
@@ -62,7 +73,7 @@ fn can_generate_eight_character_ascii_password() {
 
 #[test]
 fn can_generate_four_word_passphrase() {
-    let passphrase = generate_passphrase(&4);
+    let passphrase = generate_passphrase(&4).unwrap();
     let count = passphrase.split_whitespace().count();
 
     assert_eq!(
@@ -74,12 +85,12 @@ fn can_generate_four_word_passphrase() {
 #[test]
 #[should_panic]
 fn invalid_passphrase_length_fails() {
-    generate_passphrase(&0);
+    generate_passphrase(&0).unwrap();
 }
 
 #[test]
 fn can_generate_eight_character_username() {
-    let username = generate_username(&8);
+    let username = generate_username(&8).unwrap();
 
     assert_eq!(
         username.chars().count(),
@@ -90,12 +101,12 @@ fn can_generate_eight_character_username() {
 #[test]
 #[should_panic]
 fn invalid_username_length_fails() {
-    generate_username(&0);
+    generate_username(&0).unwrap();
 }
 
 #[test]
 fn can_generate_six_digit_pin() {
-    let pin = generate_pin(&6);
+    let pin = generate_pin(&6).unwrap();
 
     println!("{}", pin);
     assert_eq!(
@@ -107,5 +118,5 @@ fn can_generate_six_digit_pin() {
 #[test]
 #[should_panic]
 fn invalid_pin_length_fails() {
-    generate_pin(&0);
+    generate_pin(&0).unwrap();
 }

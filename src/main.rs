@@ -5,8 +5,10 @@ use std::io::Write;
 use clap::{Parser, Subcommand, Args};
 use log::LevelFilter::{Warn, Info, Debug};
 use generators::{
+    SecretKeyLength,
     generate_binary,
     generate_hexadecimal,
+    generate_base64,
     generate_password,
     generate_passphrase,
     generate_username,
@@ -34,6 +36,16 @@ struct Verbosity {
     quiet: bool
 }
 
+#[derive(Args)]
+#[group(multiple = false)]
+struct Radix {
+    #[arg(short = 'H', long = "hex", help = "Encode output as base16")]
+    hex: bool,
+
+    #[arg(short = 'B', long = "base64", help = "Encode output as base64")]
+    base64: bool
+}
+
 #[derive(Subcommand)]
 enum Commands {
     /// Generate a new secret key or username
@@ -47,31 +59,33 @@ enum Commands {
 enum GenerateCommands {
     /// Generate a random sequence of bytes
     Binary {
-        #[arg(short = 'H', long = "hexadecimal", help = "Output binary data in hexadecimal format")]
-        hexadecimal: bool,
-        length: u16
+        #[command(flatten)]
+        radix: Radix,
+
+        length: SecretKeyLength
     },
     /// Generate a random password
     Password {
         #[arg(short = 'e', long = "expanded", help = "Use every available Unicode code point")]
         expanded: bool,
-        length: u16
+
+        length: SecretKeyLength
     },
     /// Generate a random passphrase
     Passphrase {
-        length: u16
+        length: SecretKeyLength
     },
     /// Generate a random username
     Username {
-        length: u16
+        length: SecretKeyLength
     },
     /// Generate a random PIN
     Pin {
-        length: u16
+        length: SecretKeyLength
     }
 }
 
-fn main() {
+fn main() -> Result<(), String> {
     let arguments = Arguments::parse();
     let mut builder = env_logger::builder();
 
@@ -90,43 +104,92 @@ fn main() {
     match &arguments.command {
         Some(Commands::Generate { command }) => {
             match command {
-                Some(GenerateCommands::Binary { hexadecimal, length }) => {
-                    if *hexadecimal {
-                        let hex = generate_hexadecimal(length);
-
-                        println!("{}", hex);
+                Some(GenerateCommands::Binary { radix, length }) => {
+                    if radix.hex {
+                        match generate_hexadecimal(length) {
+                            Ok(value) => {
+                                println!("{}", value);
+                                Ok(())
+                            }
+                            Err(message) => {
+                                Err(message)
+                            }
+                        }
+                    }
+                    else if radix.base64 {
+                        match generate_base64(length) {
+                            Ok(value) => {
+                                println!("{}", value);
+                                Ok(())
+                            }
+                            Err(message) => {
+                                Err(message)
+                            }
+                        }
                     }
                     else {
-                        let bytes = generate_binary(length);
-                        let mut stdout = std::io::stdout();
+                        match generate_binary(length) {
+                            Ok(value) => {
+                                let mut stdout = std::io::stdout();
 
-                        stdout.write_all(&bytes).unwrap();
-                        stdout.flush().unwrap();
+                                stdout.write_all(&value).unwrap();
+                                stdout.flush().unwrap();
+
+                                Ok(())
+                            }
+                            Err(message) => {
+                                Err(message)
+                            }
+                        }
                     }
                 }
                 Some(GenerateCommands::Password { expanded, length }) => {
-                    let password = generate_password(expanded, length);
-
-                    println!("{}", password);
+                    match generate_password(expanded, length) {
+                        Ok(value) => {
+                            println!("{}", value);
+                            Ok(())
+                        }
+                        Err(message) => {
+                            Err(message)
+                        }
+                    }
                 }
                 Some(GenerateCommands::Passphrase { length }) => {
-                    let passphrase = generate_passphrase(length);
-
-                    println!("{}", passphrase);
+                    match generate_passphrase(length) {
+                        Ok(value) => {
+                            println!("{}", value);
+                            Ok(())
+                        }
+                        Err(message) => {
+                            Err(message)
+                        }
+                    }
                 }
                 Some(GenerateCommands::Username { length }) => {
-                    let username = generate_username(length);
-
-                    println!("{}", username);
+                    match generate_username(length) {
+                        Ok(value) => {
+                            println!("{}", value);
+                            Ok(())
+                        }
+                        Err(message) => {
+                            Err(message)
+                        }
+                    }
                 }
                 Some(GenerateCommands::Pin { length }) => {
-                    let pin = generate_pin(length);
-
-                    println!("{}", pin);
+                    match generate_pin(length) {
+                        Ok(value) => {
+                            println!("{}", value);
+                            Ok(())
+                        }
+                        Err(message) => {
+                            Err(message)
+                        }
+                    }
                 }
-                None => {}
+                None => panic!()
             }
         }
-        None => {}
+        None => panic!()
     }
 }

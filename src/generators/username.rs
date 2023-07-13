@@ -1,6 +1,8 @@
 use rand::{Rng, thread_rng};
 use rand::seq::SliceRandom;
 
+use super::SecretKeyLength;
+
 /// Creates a simple pronounceable username by alternating random vowels and consonants.
 /// Usernames created in this fashion are guaranteed to be pronouncable,
 /// but may not be aesthetically pleasing.
@@ -8,9 +10,11 @@ use rand::seq::SliceRandom;
 /// # Arguments
 ///
 /// * `length` - The length of the username
-pub fn generate_username(length: &u16) -> String {
+pub fn generate_username(length: &SecretKeyLength) -> Result<String, String> {
     if length <= &0 {
-        panic!("Cannot generate a username of length 0");
+        return Err(
+            format!("Cannot generate a username of length {}", length)
+        );
     }
 
     let vowels = ['a', 'e', 'i', 'o', 'u'];
@@ -50,5 +54,7 @@ pub fn generate_username(length: &u16) -> String {
         }
     }
 
-    characters.iter().collect()
+    Ok(
+        characters.iter().collect()
+    )
 }
