@@ -6,9 +6,8 @@ pub fn generate_passphrase(length: &u16) -> String {
         panic!("Cannot generate a passphrase of length 0");
     }
 
-    let wordlist = include_str!("wordlist.txt").to_string();
-
-    wordlist
+    include_str!("wordlist.txt")
+        .to_string()
         .split('\n')
         .map(|value| value.to_string())
         .choose_multiple(&mut thread_rng(), *length as usize)
