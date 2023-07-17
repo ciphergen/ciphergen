@@ -9,6 +9,6 @@ pub mod tests;
 pub use binary::{generate_binary, generate_hexadecimal, generate_base64};
 pub use password::generate_password;
 pub use passphrase::generate_passphrase;
-pub use username::generate_username;
+pub use username::{generate_simple_username, generate_syllabic_username};
 pub use pin::generate_pin;
 pub use types::SecretKeyLength;

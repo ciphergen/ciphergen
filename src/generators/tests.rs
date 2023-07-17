@@ -5,7 +5,8 @@ use super::{
     generate_base64,
     generate_password,
     generate_passphrase,
-    generate_username,
+    generate_simple_username,
+    generate_syllabic_username,
     generate_pin
 };
 
@@ -89,8 +90,8 @@ fn invalid_passphrase_length_fails() {
 }
 
 #[test]
-fn can_generate_eight_character_username() {
-    let username = generate_username(&8).unwrap();
+fn can_generate_eight_character_simple_username() {
+    let username = generate_simple_username(&8).unwrap();
 
     assert_eq!(
         username.chars().count(),
@@ -100,8 +101,14 @@ fn can_generate_eight_character_username() {
 
 #[test]
 #[should_panic]
-fn invalid_username_length_fails() {
-    generate_username(&0).unwrap();
+fn invalid_simple_username_length_fails() {
+    generate_simple_username(&0).unwrap();
+}
+
+#[test]
+#[should_panic]
+fn invalid_syllabic_username_length_fails() {
+    generate_syllabic_username(&0).unwrap();
 }
 
 #[test]
