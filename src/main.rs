@@ -1,6 +1,6 @@
 mod generators;
 
-use std::io::Write;
+use std::{io::Write, error::Error};
 
 use clap::{Parser, Subcommand, Args};
 use log::LevelFilter::{Warn, Info, Debug};
@@ -83,6 +83,12 @@ enum GenerateCommands {
     },
     /// Generate a random passphrase
     Passphrase {
+        #[arg(short = 'd', long = "delimiter", help = "The substring used to separate words from each other")]
+        delimiter: Option<String>,
+
+        #[arg(short = 'p', long = "path", help = "the wordlist file to read into memory")]
+        path: Option<String>,
+
         /// The number of words to generate
         length: SecretKeyLength
     },
@@ -112,7 +118,82 @@ enum UsernameCommands {
     }
 }
 
-fn main() -> Result<(), String> {
+fn generate(subcommand: &Option<GenerateCommands>) -> Result<(), Box<dyn Error>> {
+    match subcommand {
+        Some(GenerateCommands::Binary { length }) => {
+            let bytes = generate_binary(length)?;
+            let mut stdout = std::io::stdout();
+
+            stdout.write_all(&bytes).unwrap();
+            stdout.flush().unwrap();
+
+            Ok(())
+        }
+        Some(GenerateCommands::Hexadecimal { length }) => {
+            let hexadecimal = generate_hexadecimal(length)?;
+
+            println!("{}", hexadecimal);
+
+            Ok(())
+        }
+        Some(GenerateCommands::Base64 { length }) => {
+            let base64 = generate_base64(length)?;
+
+            println!("{}", base64);
+
+            Ok(())
+        }
+        Some(GenerateCommands::Password { expanded, length }) => {
+            let password = generate_password(expanded, length)?;
+
+            println!("{}", password);
+
+            Ok(())
+        }
+        Some(
+            GenerateCommands::Passphrase {
+                length,
+                delimiter,
+                path
+            }) => {
+                let passphrase = generate_passphrase(length, delimiter, path)?;
+
+                println!("{}", passphrase);
+
+                Ok(())
+            }
+        Some(GenerateCommands::Username { command }) => {
+            match command.into() {
+                Some(UsernameCommands::Simple { length }) => {
+                    let username = generate_simple_username(length)?;
+
+                    println!("{}", username);
+
+                    Ok(())
+                }
+                Some(UsernameCommands::Syllabic { length }) => {
+                    let username = generate_syllabic_username(length)?;
+
+                    println!("{}", username);
+
+                    Ok(())
+                }
+                None => panic!()
+
+            }
+        }
+        Some(GenerateCommands::Pin { length }) => {
+            let pin = generate_pin(length)?;
+
+            println!("{}", pin);
+
+            Ok(())
+        }
+        None => panic!()
+    }
+}
+
+fn main() -> Result<(), Box<dyn Error>> {
     let arguments = Arguments::parse();
     let mut builder = env_logger::builder();
 
@@ -130,108 +211,10 @@ fn main() -> Result<(), String> {
 
     match &arguments.command {
         Some(Commands::Generate { command }) => {
-            match command {
-                Some(GenerateCommands::Binary { length }) => {
-                    match generate_binary(length) {
-                        Ok(value) => {
-                            let mut stdout = std::io::stdout();
+            generate(command)?;
 
-                            stdout.write_all(&value).unwrap();
-                            stdout.flush().unwrap();
-
-                            Ok(())
-                        }
-                        Err(message) => {
-                            Err(message)
-                        }
-                    }
-                }
-                Some(GenerateCommands::Hexadecimal { length }) => {
-                    match generate_hexadecimal(length) {
-                        Ok(value) => {
-                            println!("{}", value);
-                            Ok(())
-                        }
-                        Err(message) => {
-                            Err(message)
-                        }
-                    }
-                }
-                Some(GenerateCommands::Base64 { length }) => {
-                    match generate_base64(length) {
-                        Ok(value) => {
-                            println!("{}", value);
-                            Ok(())
-                        }
-                        Err(message) => {
-                            Err(message)
-                        }
-                    }
-                }
-                Some(GenerateCommands::Password { expanded, length }) => {
-                    match generate_password(expanded, length) {
-                        Ok(value) => {
-                            println!("{}", value);
-                            Ok(())
-                        }
-                        Err(message) => {
-                            Err(message)
-                        }
-                    }
-                }
-                Some(GenerateCommands::Passphrase { length }) => {
-                    match generate_passphrase(length) {
-                        Ok(value) => {
-                            println!("{}", value);
-                            Ok(())
-                        }
-                        Err(message) => {
-                            Err(message)
-                        }
-                    }
-                }
-                Some(GenerateCommands::Username { command }) => {
-                    match command.into() {
-                        Some(UsernameCommands::Simple { length }) => {
-                            match generate_simple_username(length) {
-                                Ok(value) => {
-                                    println!("{}", value);
-                                    Ok(())
-                                }
-                                Err(message) => {
-                                    Err(message)
-                                }
-                            }
-                        }
-                        Some(UsernameCommands::Syllabic { length }) => {
-                            match generate_syllabic_username(length) {
-                                Ok(value) => {
-                                    println!("{}", value);
-                                    Ok(())
-                                }
-                                Err(message) => {
-                                    Err(message)
-                                }
-                            }
-                        }
-                        None => panic!()
-
-                    }
-                }
-                Some(GenerateCommands::Pin { length }) => {
-                    match generate_pin(length) {
-                        Ok(value) => {
-                            println!("{}", value);
-                            Ok(())
-                        }
-                        Err(message) => {
-                            Err(message)
-                        }
-                    }
-                }
-                None => panic!()
-            }
-        }
+            Ok(())
+        },
         None => panic!()
     }
 }

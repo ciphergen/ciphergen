@@ -74,7 +74,7 @@ fn can_generate_eight_character_ascii_password() {
 
 #[test]
 fn can_generate_four_word_passphrase() {
-    let passphrase = generate_passphrase(&4).unwrap();
+    let passphrase = generate_passphrase(&4, &Option::None, &Option::None).unwrap();
     let count = passphrase.split_whitespace().count();
 
     assert_eq!(
@@ -86,7 +86,7 @@ fn can_generate_four_word_passphrase() {
 #[test]
 #[should_panic]
 fn invalid_passphrase_length_fails() {
-    generate_passphrase(&0).unwrap();
+    generate_passphrase(&0, &Option::None, &Option::None).unwrap();
 }
 
 #[test]

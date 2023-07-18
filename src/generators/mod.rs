@@ -1,3 +1,4 @@
+pub mod letters;
 pub mod types;
 pub mod binary;
 pub mod password;
@@ -6,9 +7,10 @@ pub mod username;
 pub mod pin;
 pub mod tests;
 
-pub use binary::{generate_binary, generate_hexadecimal, generate_base64};
-pub use password::generate_password;
-pub use passphrase::generate_passphrase;
-pub use username::{generate_simple_username, generate_syllabic_username};
-pub use pin::generate_pin;
-pub use types::SecretKeyLength;
+pub use letters::*;
+pub use binary::*;
+pub use password::*;
+pub use passphrase::*;
+pub use username::*;
+pub use pin::*;
+pub use types::*;
