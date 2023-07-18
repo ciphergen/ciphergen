@@ -3,7 +3,8 @@ use super::{
     generate_binary,
     generate_hexadecimal,
     generate_base64,
-    generate_password,
+    generate_ascii_password,
+    generate_full_password,
     generate_passphrase,
     generate_simple_username,
     generate_syllabic_username,
@@ -47,8 +48,18 @@ fn can_generate_eight_random_bytes_in_base64() {
 }
 
 #[test]
-fn can_generate_eight_character_password() {
-    let password = generate_password(&true, &8).unwrap();
+fn can_generate_eight_character_ascii_password() {
+    let password = generate_ascii_password(&8).unwrap();
+
+    assert_eq!(
+        password.chars().count(),
+        8
+    )
+}
+
+#[test]
+fn can_generate_eight_character_full_password() {
+    let password = generate_full_password(&8).unwrap();
 
     assert_eq!(
         password.chars().count(),
@@ -58,18 +69,14 @@ fn can_generate_eight_character_password() {
 
 #[test]
 #[should_panic]
-fn invalid_password_length_fails() {
-    generate_password(&false, &0).unwrap();
+fn invalid_ascii_password_length_fails() {
+    generate_ascii_password(&0).unwrap();
 }
 
 #[test]
-fn can_generate_eight_character_ascii_password() {
-    let password = generate_password(&false, &8).unwrap();
-
-    assert_eq!(
-        password.chars().count(),
-        8
-    )
+#[should_panic]
+fn invalid_full_password_length_fails() {
+    generate_full_password(&0).unwrap();
 }
 
 #[test]

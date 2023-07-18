@@ -9,7 +9,8 @@ use generators::{
     generate_binary,
     generate_hexadecimal,
     generate_base64,
-    generate_password,
+    generate_ascii_password,
+    generate_full_password,
     generate_passphrase,
     generate_simple_username,
     generate_syllabic_username,
@@ -75,11 +76,8 @@ enum GenerateCommands {
     },
     /// Generate a random password
     Password {
-        #[arg(short = 'e', long = "expanded", help = "Use every available Unicode code point")]
-        expanded: bool,
-
-        /// The number of characters to generate
-        length: SecretKeyLength
+        #[command(subcommand)]
+        command: PasswordCommands
     },
     /// Generate a random passphrase
     Passphrase {
@@ -118,6 +116,20 @@ enum UsernameCommands {
     }
 }
 
+#[derive(Subcommand)]
+enum PasswordCommands {
+    /// Create a password that consists of random ASCII code points
+    Alphabetic {
+        /// The number of characters to generate
+        length: SecretKeyLength
+    },
+    /// Create a password that consists of random Unicode code points
+    Full {
+        /// The number of characters to generate
+        length: SecretKeyLength
+    }
+}
+
 fn generate(subcommand: &Option<GenerateCommands>) -> Result<(), Box<dyn Error>> {
     match subcommand {
         Some(GenerateCommands::Binary { length }) => {
@@ -143,12 +155,24 @@ fn generate(subcommand: &Option<GenerateCommands>) -> Result<(), Box<dyn Error>>
 
             Ok(())
         }
-        Some(GenerateCommands::Password { expanded, length }) => {
-            let password = generate_password(expanded, length)?;
+        Some(GenerateCommands::Password { command }) => {
+            match command.into() {
+                Some(PasswordCommands::Alphabetic { length }) => {
+                    let password = generate_ascii_password(length)?;
 
-            println!("{}", password);
+                    println!("{}", password);
 
-            Ok(())
+                    Ok(())
+                },
+                Some(PasswordCommands::Full { length }) => {
+                    let password = generate_full_password(length)?;
+
+                    println!("{}", password);
+
+                    Ok(())
+                },
+                None => panic!()
+            }
         }
         Some(
             GenerateCommands::Passphrase {
