@@ -2,22 +2,56 @@ name: Check
 
 on:
     push:
-        branches: [ "main" ]
+        branches:
+            - stable
+            - main
+            - dev
     pull_request:
-        branches: [ "main" ]
+        branches:
+            - stable
+            - main
+            - dev
 
 env:
     CARGO_TERM_COLOR: always
+    CACHE_KEY: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+    CACHE_PATHS: |
+        ~/.cargo/bin/
+        ~/.cargo/registry/index/
+        ~/.cargo/registry/cache/
+        ~/.cargo/git/db/
+        target/
 
 jobs:
-    build:
+    check:
+        name: Check
         runs-on: ubuntu-latest
         steps:
-             -
-                 uses: actions/checkout@v3
-             -
-                 name: Build
-                 run: cargo build --verbose
-             -
-                 name: Test
-                 run: cargo test --verbose
+            -
+                name: Cache
+                uses: actions/cache@v3
+                with:
+                    path: ${{ env.CACHE_PATHS }}
+                    key: ${{ env.CACHE_KEY }}
+            -
+                name: Checkout
+                uses: actions/checkout@v3
+            -
+                name: Check
+                run: cargo check --verbose
+    test:
+        name: Test
+        runs-on: ubuntu-latest
+        steps:
+            -
+                name: Cache
+                uses: actions/cache@v3
+                with:
+                    path: ${{ env.CACHE_PATHS }}
+                    key: ${{ env.CACHE_KEY }}
+            -
+                name: Checkout
+                uses: actions/checkout@v3
+            -
+                name: Test
+                run: cargo test --verbose
