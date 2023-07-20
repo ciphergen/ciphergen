@@ -1,6 +1,7 @@
 name: Check
 
 on:
+    workflow_call:
     push:
         branches:
             - stable
@@ -14,7 +15,6 @@ on:
 
 env:
     CARGO_TERM_COLOR: always
-    CACHE_KEY: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
     CACHE_PATHS: |
         ~/.cargo/bin/
         ~/.cargo/registry/index/
@@ -32,7 +32,7 @@ jobs:
                 uses: actions/cache@v3
                 with:
                     path: ${{ env.CACHE_PATHS }}
-                    key: ${{ env.CACHE_KEY }}
+                    key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
             -
                 name: Checkout
                 uses: actions/checkout@v3
@@ -48,7 +48,7 @@ jobs:
                 uses: actions/cache@v3
                 with:
                     path: ${{ env.CACHE_PATHS }}
-                    key: ${{ env.CACHE_KEY }}
+                    key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
             -
                 name: Checkout
                 uses: actions/checkout@v3
