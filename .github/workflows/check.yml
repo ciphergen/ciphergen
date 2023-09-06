@@ -32,7 +32,7 @@ jobs:
                 uses: actions/cache@v3
                 with:
                     path: ${{ env.CACHE_PATHS }}
-                    key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+                    key: check-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
             -
                 name: Checkout
                 uses: actions/checkout@v3
@@ -48,7 +48,7 @@ jobs:
                 uses: actions/cache@v3
                 with:
                     path: ${{ env.CACHE_PATHS }}
-                    key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+                    key: test-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
             -
                 name: Checkout
                 uses: actions/checkout@v3
