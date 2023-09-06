@@ -1,19 +1,19 @@
 #[allow(unused_imports)]
-use super::{
-    generate_binary,
-    generate_hexadecimal,
-    generate_base64,
-    generate_ascii_password,
-    generate_full_password,
-    generate_passphrase,
-    generate_simple_username,
-    generate_syllabic_username,
-    generate_pin
-};
+use super::binary::{generate_bytes, generate_hex, generate_base64};
+#[allow(unused_imports)]
+use super::password::{generate_ascii_password, generate_full_password};
+#[allow(unused_imports)]
+use super::passphrase::generate_passphrase;
+#[allow(unused_imports)]
+use super::username::{generate_simple_username, generate_syllabic_username};
+#[allow(unused_imports)]
+use super::digits::generate_digits;
+#[allow(unused_imports)]
+use super::number::generate_number;
 
 #[test]
 fn can_generate_eight_random_bytes() {
-    let bytes = generate_binary(&8).unwrap();
+    let bytes = generate_bytes(&8).unwrap();
 
     assert_eq!(
         bytes.len(),
@@ -24,12 +24,12 @@ fn can_generate_eight_random_bytes() {
 #[test]
 #[should_panic]
 fn invalid_bytes_length_fails() {
-    generate_binary(&0).unwrap();
+    generate_bytes(&0).unwrap();
 }
 
 #[test]
 fn can_generate_eight_random_bytes_in_hex() {
-    let hex = generate_hexadecimal(&8).unwrap();
+    let hex = generate_hex(&false, &8).unwrap();
 
     assert_eq!(
         hex.chars().count(),
@@ -39,7 +39,7 @@ fn can_generate_eight_random_bytes_in_hex() {
 
 #[test]
 fn can_generate_eight_random_bytes_in_base64() {
-    let base64 = generate_base64(&8).unwrap();
+    let base64 = generate_base64(&false, &8).unwrap();
 
     assert_eq!(
         base64.chars().count(),
@@ -119,18 +119,26 @@ fn invalid_syllabic_username_length_fails() {
 }
 
 #[test]
-fn can_generate_six_digit_pin() {
-    let pin = generate_pin(&6).unwrap();
+fn can_generate_six_digits() {
+    let digits = generate_digits(&6).unwrap();
 
-    println!("{}", pin);
     assert_eq!(
-        pin.to_string().chars().count(),
+        digits.to_string().chars().count(),
         6
     )
 }
 
 #[test]
 #[should_panic]
-fn invalid_pin_length_fails() {
-    generate_pin(&0).unwrap();
+fn invalid_digits_length_fails() {
+    generate_digits(&0).unwrap();
+}
+
+#[test]
+fn can_generate_number() {
+    let number = generate_number(&0, &1024).unwrap();
+
+    assert!(
+        number < 1024
+    )
 }

@@ -1,65 +1,72 @@
-use std::error::Error;
-use std::fs::read_to_string;
-use rand::thread_rng;
 use rand::seq::SliceRandom;
-use thiserror::Error;
+use rand::thread_rng;
+use std::fmt;
+use std::fs::read_to_string;
 
-use super::types::SecretKeyLength;
+const DEFAULT_SEPARATOR: &str = " ";
 
-type WordlistReturnType = Result<Vec<String>, Box<dyn Error>>;
+fn load_wordlist(path: &String) -> Result<Vec<String>, GeneratePassphraseError> {
+    let input = read_to_string(path).map_err(GeneratePassphraseError::IO)?;
+    let wordlist = input.split('\n').map(|value| value.to_string()).collect();
 
-const SPACE: &str = " ";
-
-fn load_wordlist(path: &String) -> WordlistReturnType {
-    let input = read_to_string(path)?;
-
-    Ok(
-        input
-            .split('\n')
-            .map(|value| value.to_string())
-            .collect()
-    )
+    Ok(wordlist)
 }
 
-fn load_default_wordlist() -> WordlistReturnType {
-    Ok(
-        include_str!("wordlist.txt")
-            .to_string()
-            .split('\n')
-            .map(|value| value.to_string())
-            .collect()
-    )
+fn load_default_wordlist() -> Vec<String> {
+    include_str!("wordlist.txt")
+        .split('\n')
+        .map(|value| value.to_string())
+        .collect()
 }
 
-#[derive(Debug, Error)]
-enum GeneratePassphraseError {
-    #[error("Cannot generate a passphrase of length {0}")]
-    InvalidLength(SecretKeyLength),
-    #[error("No word list available")]
-    NoWordlist
+#[derive(Debug)]
+pub enum GeneratePassphraseError {
+    InvalidLength(u64),
+    EmptyWordlist,
+    IO(std::io::Error),
+}
+
+impl fmt::Display for GeneratePassphraseError {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            GeneratePassphraseError::InvalidLength(length) => {
+                write!(formatter, "expected positive integer but got {}", length)
+            }
+            GeneratePassphraseError::EmptyWordlist => {
+                write!(formatter, "The provided wordlist is empty")
+            }
+            GeneratePassphraseError::IO(error) => write!(formatter, "{}", error),
+        }
+    }
+}
+
+impl std::error::Error for GeneratePassphraseError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match *self {
+            GeneratePassphraseError::InvalidLength(_) => None,
+            GeneratePassphraseError::EmptyWordlist => None,
+            GeneratePassphraseError::IO(ref error) => Some(error),
+        }
+    }
 }
 
 /// Generate a passphrase.
 pub fn generate_passphrase(
-    length: &SecretKeyLength,
+    length: &u64,
     delimiter: &Option<String>,
-    path: &Option<String>
-) -> Result<String, Box<dyn Error>> {
+    path: &Option<String>,
+) -> Result<String, GeneratePassphraseError> {
     if *length == 0 {
-        return Err(
-            Box::new(GeneratePassphraseError::InvalidLength(*length))
-        );
+        return Err(GeneratePassphraseError::InvalidLength(*length));
     }
 
     let wordlist = match path {
-        Some(value) => load_wordlist(value),
-        None => load_default_wordlist()
-    }?;
+        Some(value) => load_wordlist(value)?,
+        None => load_default_wordlist(),
+    };
 
     if wordlist.is_empty() {
-        return Err(
-            Box::new(GeneratePassphraseError::NoWordlist)
-        )
+        return Err(GeneratePassphraseError::EmptyWordlist);
     }
 
     let words: Vec<String> = wordlist
@@ -67,12 +74,11 @@ pub fn generate_passphrase(
         .map(|value| value.to_string())
         .collect();
 
-    let separator = match delimiter {
-        Some(value) => value.as_str(),
-        None => SPACE
-    };
+    let separator = delimiter
+        .clone()
+        .unwrap_or(DEFAULT_SEPARATOR.to_string());
 
-    Ok(
-        words.join(separator)
-    )
+    let passphrase = words.join(&separator);
+
+    Ok(passphrase)
 }

@@ -1,26 +1,20 @@
 use rand::rngs::ThreadRng;
 use rand::seq::SliceRandom;
 
-const VOWELS: [char; 5] = ['a', 'e', 'i', 'o', 'u'];
+const VOWELS: [char; 6] = ['a', 'e', 'i', 'o', 'u', 'y'];
 const CONSONANTS: [char; 20] = [
     'b', 'c', 'd', 'f', 'g',
     'h', 'j', 'k', 'l', 'm',
-    'n', 'p', 'r', 's', 't',
-    'v', 'w', 'x', 'y', 'z'
+    'n', 'p', 'q', 'r', 's',
+    't', 'v', 'w', 'x', 'z'
 ];
 
 pub fn choose_random_vowel(rng: &mut ThreadRng) -> &char {
-    match VOWELS.choose(rng) {
-        Some(value) => value,
-        None => panic!("Failed to choose a random vowel")
-    }
+    VOWELS.choose(rng).unwrap()
 }
 
 pub fn choose_random_consonant(rng: &mut ThreadRng) -> &char {
-    match CONSONANTS.choose(rng) {
-        Some(value) => value,
-        None => panic!("Failed to choose a random consonant")
-    }
+    CONSONANTS.choose(rng).unwrap()
 }
 
 pub fn add_vowel(input: &mut Vec<char>, rng: &mut ThreadRng) {

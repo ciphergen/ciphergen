@@ -1,17 +1,39 @@
+use std::fmt;
 use rand::rngs::ThreadRng;
 use rand::{Rng, thread_rng};
 use super::letters::{add_consonant, add_vowel, choose_random_consonant, choose_random_vowel};
 
-use super::SecretKeyLength;
+#[derive(Debug)]
+pub enum GenerateUsernameError {
+    InvalidLength(u64)
+}
+
+impl fmt::Display for GenerateUsernameError {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            GenerateUsernameError::InvalidLength(length) => {
+                write!(formatter, "expected a positive integer but got {} instead", length)
+            }
+        }
+    }
+}
+
+impl std::error::Error for GenerateUsernameError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match *self {
+            GenerateUsernameError::InvalidLength(_) => None
+        }
+    }
+}
 
 /// Generate a simple pronounceable username by alternating random vowels and consonants.
 ///
 /// Usernames created in this fashion are guaranteed to be pronouncable,
 /// but are likely to be flagged as suspicious by automated tools and may not be aesthetically pleasing.
-pub fn generate_simple_username(length: &SecretKeyLength) -> Result<String, String> {
+pub fn generate_simple_username(length: &u64) -> Result<String, GenerateUsernameError> {
     if length <= &0 {
         return Err(
-            format!("Cannot generate a username of length {}", length)
+            GenerateUsernameError::InvalidLength(*length)
         );
     }
 
@@ -58,10 +80,10 @@ fn create_closed_syllable(rng: &mut ThreadRng) -> String {
 ///
 /// Syllabic usernames are less likely to be flagged as suspicious by automated tools,
 /// and may be more aesthetically pleasing.
-pub fn generate_syllabic_username(count: &SecretKeyLength) -> Result<String, String> {
+pub fn generate_syllabic_username(count: &u64) -> Result<String, GenerateUsernameError> {
     if count <= &0 {
         return Err(
-            format!("Cannot generate a username with {} syllables", count)
+            GenerateUsernameError::InvalidLength(*count)
         );
     }
 
