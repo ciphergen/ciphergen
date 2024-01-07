@@ -42,6 +42,8 @@ jobs:
                   key: build-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
             - name: Checkout
               uses: actions/checkout@v3
+            - name: Add Target
+              run: rustup target add ${{ matrix.platform.target }}
             - name: Build
               run: cargo build --target ${{ matrix.platform.target }}
             - uses: actions/upload-artifact@v3
