@@ -14,7 +14,7 @@ env:
     ~/.cargo/git/db/
     target/
   ARTIFACT_PATHS: |
-    target/release/
+    target/
 
 jobs:
   check:
@@ -63,7 +63,7 @@ jobs:
       - name: Build
         run: cargo build --release --target x86_64-pc-windows-msvc
       - name: List Artifacts
-        run: tree -a ${{ env.ARTIFACT_PATHS }}
+        run: tree ${{ env.ARTIFACT_PATHS }}
       - uses: actions/upload-artifact@v3
         with:
           name: ${{ env.ARTIFACT_NAME }}-${{ runner.os }}
