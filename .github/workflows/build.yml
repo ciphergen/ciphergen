@@ -35,9 +35,9 @@ jobs:
       - name: Update Toolchains
         run: rustup update
       - name: Add Targets
-        run: rustup target add x86_64-unknown-linux-gnu aarch64-unknown-linux-gnu
+        run: rustup target add x86_64-unknown-linux-gnu
       - name: Build
-        run: cargo build --release --target x86_64-unknown-linux-gnu --target aarch64-unknown-linux-gnu
+        run: cargo build --release --target x86_64-unknown-linux-gnu
       - uses: actions/upload-artifact@v3
         with:
           name: ${{ env.ARTIFACT_NAME }}
