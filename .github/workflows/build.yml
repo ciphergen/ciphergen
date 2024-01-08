@@ -13,8 +13,6 @@ env:
     ~/.cargo/registry/cache/
     ~/.cargo/git/db/
     target/
-  ARTIFACT_PATHS: |
-    target/
 
 jobs:
   check:
@@ -39,11 +37,11 @@ jobs:
       - name: Build
         run: cargo build --release --target x86_64-unknown-linux-gnu
       - name: List Artifacts
-        run: tree -a ${{ env.ARTIFACT_PATHS }}
+        run: tree -a target
       - uses: actions/upload-artifact@v3
         with:
           name: ${{ env.ARTIFACT_NAME }}-${{ runner.os }}
-          path: ${{ env.ARTIFACT_PATHS }}
+          path: target/**/release/ciphergen
   build-windows:
     name: Build Windows
     runs-on: windows-latest
@@ -63,8 +61,8 @@ jobs:
       - name: Build
         run: cargo build --release --target x86_64-pc-windows-msvc
       - name: List Artifacts
-        run: tree ${{ env.ARTIFACT_PATHS }}
+        run: tree target
       - uses: actions/upload-artifact@v3
         with:
           name: ${{ env.ARTIFACT_NAME }}-${{ runner.os }}
-          path: ${{ env.ARTIFACT_PATHS }}
+          path: target/**/release/ciphergen.exe
