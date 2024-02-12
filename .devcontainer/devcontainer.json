@@ -32,10 +32,16 @@
 			"source": "${devcontainerId}-cargo",
 			"target": "/usr/local/cargo",
 			"type": "volume"
+		},
+		{
+			"source": "${devcontainerId}-target",
+			"target": "${containerWorkspaceFolder}/target",
+			"type": "volume"
 		}
 	],
 	"containerEnv": {},
 	"containerUser": "vscode",
+    "postCreateCommand": "sudo chown -R vscode:vscode .",
 	"customizations": {
 		"vscode": {
 			"extensions": [
