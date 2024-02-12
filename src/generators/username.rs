@@ -30,25 +30,31 @@ impl std::error::Error for GenerateUsernameError {
 /// Usernames created in this fashion are guaranteed to be pronouncable,
 /// but are likely to be flagged as suspicious by automated tools and may not be aesthetically pleasing.
 pub fn generate_simple_username(length: &u64) -> Result<Vec<u8>, GenerateUsernameError> {
-    if length <= &0 { return Err(GenerateUsernameError::InvalidLength(*length)); }
+    if *length <= 0 { return Err(GenerateUsernameError::InvalidLength(*length)); }
 
     let mut output: Vec<char> = Vec::new();
     let rng = &mut thread_rng();
     let start = rng.gen_bool(1.0 / 2.0);
 
-    for index in 0..*length {
-        // Flip a coin to choose between starting with a vowel or a consonant.
-        if start {
-            // If the current index is even.
-            if index % 2 == 0 { add_consonant(&mut output, rng); } else { add_vowel(&mut output, rng); }
-        }
-        else if index % 2 != 0 { add_vowel(&mut output, rng); }
-        else { add_consonant(&mut output, rng); }
+    // Flip a coin to choose between starting with a vowel or a consonant.
+    match start {
+        true => { add_vowel(&mut output, rng); }
+        false => { add_consonant(&mut output, rng); }
     }
 
-    let value = output.iter().collect::<String>().into_bytes();
+    // If only one character is needed, then we are done.
+    if *length == 1 { return Ok(output.iter().collect::<String>().into_bytes()); }
 
-    Ok(value)
+    // Alternate between adding consonants and vowels
+    for index in 0..(*length - 1) {
+        // If we started with a vowel, then we must add a consonant next, and vice-versa.
+        match start {
+            true => if index % 2 != 0 { add_vowel(&mut output, rng); } else { add_consonant(&mut output, rng); }
+            false => if index % 2 != 0 { add_consonant(&mut output, rng); } else { add_vowel(&mut output, rng); }
+        }
+    }
+
+    Ok(output.iter().collect::<String>().into_bytes())
 }
 
 fn create_closed_syllable(rng: &mut ThreadRng) -> String {
