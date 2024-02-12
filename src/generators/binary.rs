@@ -29,41 +29,24 @@ impl std::error::Error for GenerateBytesError {
 }
 
 pub fn generate_bytes(length: &u64) -> Result<Vec<u8>, GenerateBytesError> {
-    if length <= &0 {
-        return Err(
-            GenerateBytesError::InvalidLength(*length)
-        );
-    }
+    if length <= &0 { return Err(GenerateBytesError::InvalidLength(*length)); }
 
     let range = Uniform::new(u8::MIN, u8::MAX);
-    let bytes = thread_rng()
-        .sample_iter(range)
-        .take(*length as usize)
-        .collect();
+    let bytes = thread_rng().sample_iter(range).take(*length as usize).collect();
 
     Ok(bytes)
 }
 
-pub fn generate_hex(uppercase: &bool, length: &u64) -> Result<String, GenerateBytesError> {
+pub fn generate_hex(uppercase: &bool, length: &u64) -> Result<Vec<u8>, GenerateBytesError> {
     let bytes = generate_bytes(length)?;
-    let hex = if *uppercase {
-        encode_upper(bytes)
-    }
-    else {
-        encode(bytes)
-    };
+    let hex = if *uppercase { encode_upper(bytes).into_bytes() } else { encode(bytes).into_bytes() };
 
     Ok(hex)
 }
 
-pub fn generate_base64(url_safe: &bool, length: &u64) -> Result<String, GenerateBytesError> {
+pub fn generate_base64(url_safe: &bool, length: &u64) -> Result<Vec<u8>, GenerateBytesError> {
     let bytes = generate_bytes(length)?;
-    let base64 = if *url_safe {
-        URL_SAFE.encode(bytes)
-    }
-    else {
-        STANDARD.encode(bytes)
-    };
+    let base64 = if *url_safe { URL_SAFE.encode(bytes).into_bytes() } else { STANDARD.encode(bytes).into_bytes() };
 
     Ok(base64)
 }

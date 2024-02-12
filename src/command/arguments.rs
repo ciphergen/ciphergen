@@ -65,19 +65,22 @@ pub enum GenerateCommands {
     },
     /// Generate a random password
     Password {
-        #[command(subcommand)]
-        command: PasswordCommands
+        /// The number of characters to generate
+        length: u64
     },
     /// Generate a random passphrase
     Passphrase {
-        #[arg(short = 'd', long = "delimiter", help = "The substring used to separate words from each other")]
-        delimiter: Option<String>,
-
-        #[arg(short = 'p', long = "path", help = "the wordlist file to read into memory")]
+        #[arg(short = 'p', long = "path", help = "The wordlist file to read into memory")]
         path: Option<String>,
 
+        #[arg(short = 'd', long = "delimiter", help = "The string used to separate words from each other in the wordlist", default_value = "\n")]
+        delimiter: String,
+
         /// The number of words to generate
-        length: u64
+        length: u64,
+
+        /// A string used to separate words in the passphrase
+        separator: Option<String>,
     },
     /// Generate a random username
     Username {
@@ -109,20 +112,6 @@ pub enum UsernameCommands {
     /// Create a complex username that is constructed from syllables
     Syllabic {
         /// The number of syllables to generate
-        length: u64
-    }
-}
-
-#[derive(Subcommand)]
-pub enum PasswordCommands {
-    /// Create a password that consists of random ASCII code points
-    Alphabetic {
-        /// The number of characters to generate
-        length: u64
-    },
-    /// Create a password that consists of random Unicode code points
-    Full {
-        /// The number of characters to generate
         length: u64
     }
 }

@@ -1,6 +1,6 @@
 use std::fmt;
-use rand::{Rng, thread_rng};
-use rand::distributions::{Alphanumeric, Standard, DistString};
+use rand::thread_rng;
+use rand::distributions::{Alphanumeric, DistString};
 
 #[derive(Debug)]
 pub enum GeneratePasswordError {
@@ -25,33 +25,10 @@ impl std::error::Error for GeneratePasswordError {
     }
 }
 
-pub fn generate_ascii_password(length: &u64) -> Result<String, GeneratePasswordError> {
-    if length <= &0 {
-        return Err(
-            GeneratePasswordError::InvalidLength(*length)
-        );
-    }
+pub fn generate_password(length: &u64) -> Result<Vec<u8>, GeneratePasswordError> {
+    if length <= &0 { return Err(GeneratePasswordError::InvalidLength(*length)); }
 
-    let password = Alphanumeric.sample_string(
-        &mut thread_rng(),
-        *length as usize
-    );
-
-    Ok(password)
-}
-
-pub fn generate_full_password(length: &u64) -> Result<String, GeneratePasswordError> {
-    if length <= &0 {
-        return Err(
-            GeneratePasswordError::InvalidLength(*length)
-        );
-    }
-
-    let password = thread_rng()
-        .sample_iter::<char, Standard>(Standard)
-        .take(*length as usize)
-        .map(char::from)
-        .collect();
+    let password = Alphanumeric.sample_string(&mut thread_rng(), *length as usize).into_bytes();
 
     Ok(password)
 }

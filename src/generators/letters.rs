@@ -1,7 +1,11 @@
 use rand::rngs::ThreadRng;
 use rand::seq::SliceRandom;
 
-const VOWELS: [char; 6] = ['a', 'e', 'i', 'o', 'u', 'y'];
+const VOWELS: [char; 6] = [
+    'a', 'e', 'i',
+    'o', 'u', 'y'
+];
+
 const CONSONANTS: [char; 20] = [
     'b', 'c', 'd', 'f', 'g',
     'h', 'j', 'k', 'l', 'm',
