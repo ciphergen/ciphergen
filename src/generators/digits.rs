@@ -22,12 +22,12 @@ impl std::error::Error for GenerateDigitsError {
     }
 }
 
-pub fn generate_digits(length: &u64) -> Result<Vec<u8>, GenerateDigitsError> {
-    if length <= &0 { return Err(GenerateDigitsError::InvalidLength(*length)); }
+pub fn generate_digits(length: u64) -> Result<Vec<u8>, GenerateDigitsError> {
+    if length == 0 { return Err(GenerateDigitsError::InvalidLength(length)); }
 
     let radix = 10.0f64;
     let offset = length - 1;
-    let maximum = radix.powi(*length as i32) as u64;
+    let maximum = radix.powi(length as i32) as u64;
     let minimum = radix.powi(offset as i32) as u64;
     let value = thread_rng().gen_range(minimum..maximum).to_string().into_bytes();
 

@@ -29,8 +29,8 @@ impl std::error::Error for GenerateUsernameError {
 ///
 /// Usernames created in this fashion are guaranteed to be pronouncable,
 /// but are likely to be flagged as suspicious by automated tools and may not be aesthetically pleasing.
-pub fn generate_simple_username(length: &u64) -> Result<Vec<u8>, GenerateUsernameError> {
-    if *length <= 0 { return Err(GenerateUsernameError::InvalidLength(*length)); }
+pub fn generate_simple_username(length: u64) -> Result<Vec<u8>, GenerateUsernameError> {
+    if length == 0 { return Err(GenerateUsernameError::InvalidLength(length)); }
 
     let mut output: Vec<char> = Vec::new();
     let rng = &mut thread_rng();
@@ -43,10 +43,10 @@ pub fn generate_simple_username(length: &u64) -> Result<Vec<u8>, GenerateUsernam
     }
 
     // If only one character is needed, then we are done.
-    if *length == 1 { return Ok(output.iter().collect::<String>().into_bytes()); }
+    if length == 1 { return Ok(output.iter().collect::<String>().into_bytes()); }
 
     // Alternate between adding consonants and vowels
-    for index in 0..(*length - 1) {
+    for index in 0..(length - 1) {
         // If we started with a vowel, then we must add a consonant next, and vice-versa.
         match start {
             true => if index % 2 != 0 { add_vowel(&mut output, rng); } else { add_consonant(&mut output, rng); }
@@ -94,12 +94,12 @@ impl Distribution<SyllableType> for Standard {
 ///
 /// Syllabic usernames are less likely to be flagged as suspicious by automated tools,
 /// and may be more aesthetically pleasing.
-pub fn generate_syllabic_username(count: &u64) -> Result<Vec<u8>, GenerateUsernameError> {
-    if count <= &0 { return Err(GenerateUsernameError::InvalidLength(*count)); }
+pub fn generate_syllabic_username(count: u64) -> Result<Vec<u8>, GenerateUsernameError> {
+    if count == 0 { return Err(GenerateUsernameError::InvalidLength(count)); }
 
     let rng = &mut thread_rng();
     let mut output = String::new();
-    let limit = (*count * 2) - 1;
+    let limit = (count * 2) - 1;
 
     for _ in 0..limit {
         // Generate a random syllable of a random type.

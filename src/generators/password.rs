@@ -25,10 +25,10 @@ impl std::error::Error for GeneratePasswordError {
     }
 }
 
-pub fn generate_password(length: &u64) -> Result<Vec<u8>, GeneratePasswordError> {
-    if length <= &0 { return Err(GeneratePasswordError::InvalidLength(*length)); }
+pub fn generate_password(length: u64) -> Result<Vec<u8>, GeneratePasswordError> {
+    if length == 0 { return Err(GeneratePasswordError::InvalidLength(length)); }
 
-    let password = Alphanumeric.sample_string(&mut thread_rng(), *length as usize).into_bytes();
+    let password = Alphanumeric.sample_string(&mut thread_rng(), length as usize).into_bytes();
 
     Ok(password)
 }

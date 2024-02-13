@@ -45,7 +45,7 @@ pub enum GenerateCommands {
     /// Generate random bytes
     Bytes {
         /// The number of bytes to generate
-        count: u64
+        length: u64
     },
     /// Generate random bytes and encode them as a hexadecimal string
     Hex {
@@ -53,7 +53,7 @@ pub enum GenerateCommands {
         uppercase: bool,
 
         /// The number of bytes to generate
-        count: u64
+        length: u64
     },
     /// Generate random bytes and encode them as a Base64 string
     Base64 {
@@ -61,14 +61,17 @@ pub enum GenerateCommands {
         url_safe: bool,
 
         /// The number of bytes to generate
-        count: u64
-    },
-    /// Generate a random password
-    Password {
-        /// The number of characters to generate
         length: u64
     },
-    /// Generate a random passphrase
+    /// Generate a random alphanumeric password
+    Password {
+        /// The number of characters to generate
+        length: u64,
+
+        /// How many passwords to generate
+        count: Option<u64>
+    },
+    /// Generate a passphrase composed of words chosen at random from a wordlist
     Passphrase {
         #[arg(short = 'p', long = "path", help = "The wordlist file to read into memory")]
         path: Option<String>,
@@ -76,21 +79,27 @@ pub enum GenerateCommands {
         #[arg(short = 'd', long = "delimiter", help = "The string used to separate words from each other in the wordlist", default_value = "\n")]
         delimiter: String,
 
+        #[arg(short = 's', long = "separator", help = "A string used to separate words in the passphrase", default_value = " ")]
+        separator: String,
+
         /// The number of words to generate
         length: u64,
 
-        /// A string used to separate words in the passphrase
-        separator: Option<String>,
+        /// How many passphrases to generate
+        count: Option<u64>
     },
-    /// Generate a random username
+    /// Generate a random pronounceable username
     Username {
         #[command(subcommand)]
         command: UsernameCommands
     },
-    /// Generate random digits
+    /// Generate a random sequence of digits
     Digits {
         /// The number of digits to generate
-        count: u64
+        length: u64,
+
+        /// How many sequences of digits to generate
+        count: Option<u64>
     },
     /// Generate a random number
     Number {
@@ -98,21 +107,30 @@ pub enum GenerateCommands {
         minimum: u64,
 
         /// The largest number that can be generated
-        maximum: u64
+        maximum: u64,
+
+        /// How many numbers to generate
+        count: Option<u64>
     }
 }
 
 #[derive(Subcommand)]
 pub enum UsernameCommands {
-    /// Create a simple username that alternates between vowels and consonants
+    /// Generate a simple pronounceable username that alternates between vowels and consonants
     Simple {
         /// The number of characters to generate
-        length: u64
+        length: u64,
+
+        /// How many simple usernames to generate
+        count: Option<u64>
     },
-    /// Create a complex username that is constructed from syllables
+    /// Generate a complex pronounceable username that is constructed from syllables
     Syllabic {
         /// The number of syllables to generate
-        length: u64
+        length: u64,
+
+        /// How many syllabic usernames to generate
+        count: Option<u64>
     }
 }
 
