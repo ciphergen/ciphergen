@@ -21,8 +21,8 @@ impl fmt::Display for Report {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut builder = Builder::new();
 
-        builder.push_record(["Size", &self.size.to_string()]);
-        builder.push_record(["Entropy", &self.entropy.to_string()]);
+        builder.push_record(["Size", &self.size]);
+        builder.push_record(["Entropy", &self.entropy]);
         builder.push_record(["MD5", &self.md5]);
         builder.push_record(["SHA1", &self.sha1]);
         builder.push_record(["SHA256", &self.sha256]);
