@@ -21,8 +21,8 @@ impl fmt::Display for Report {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut builder = Builder::new();
 
-        builder.push_record(["Input Size", &self.size.to_string()]);
-        builder.push_record(["Shannon Entropy", &self.entropy.to_string()]);
+        builder.push_record(["Size", &self.size.to_string()]);
+        builder.push_record(["Entropy", &self.entropy.to_string()]);
         builder.push_record(["MD5", &self.md5]);
         builder.push_record(["SHA1", &self.sha1]);
         builder.push_record(["SHA256", &self.sha256]);
@@ -56,13 +56,16 @@ pub fn analyze(buffer: Vec<u8>) -> String {
 }
 
 pub fn shannon_entropy(buffer: &Vec<u8>) -> f64 {
-    let mut histogram = HashMap::<u8, u8>::new();
+    let length = buffer.len() as f64;
+    let histogram = buffer.iter().fold(
+        HashMap::new(), |mut acc, e| {
+            *acc.entry(e).or_insert(0) = *acc.entry(e).or_insert(0) + 1;
+            acc
+        }
+    );
 
-    for byte in buffer.iter() {
-        *histogram.entry(*byte).or_insert(0) += 1;
-    }
-
-    let total = histogram.values().sum::<u8>();
-
-    -histogram.into_iter().map(|(_, value)| (value as f64 / total as f64).log2()).sum::<f64>()
+    histogram.values().fold(0f64, |ac, &x| {
+        let f = x as f64 / length;
+        ac - (f * f.log2())
+    })
 }
