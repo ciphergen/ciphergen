@@ -21,22 +21,18 @@ pub struct Verbosity {
     pub quiet: bool
 }
 
-#[derive(Args)]
-#[group(multiple = false)]
-pub struct Radix {
-    #[arg(short = 'H', long = "hex", help = "Encode output as base16")]
-    pub hex: bool,
-
-    #[arg(short = 'B', long = "base64", help = "Encode output as base64")]
-    pub base64: bool
-}
-
 #[derive(Subcommand)]
 pub enum Commands {
     /// Generate a new secret key or username
     Generate {
+        /// The command to execute
         #[command(subcommand)]
         command: GenerateCommands
+    },
+    /// Cryptographically analyze a piece of data
+    Analyze {
+        /// The data to analyze, or leave empty to read from STDIN
+        input: Option<String>
     }
 }
 

@@ -191,16 +191,16 @@ fn number(minimum: u64, maximum: u64, count: Option<u64>) -> Result<Vec<u8>, Gen
     Ok(output)
 }
 
-pub fn generate(command: &GenerateCommands) -> Result<Vec<u8>, GenerateError> {
+pub fn generate(command: GenerateCommands) -> Result<Vec<u8>, GenerateError> {
     match command {
-        GenerateCommands::Bytes { length } => bytes(*length),
-        GenerateCommands::Hex { uppercase, length } => hex(*uppercase, *length),
-        GenerateCommands::Base64 { url_safe, length } => base64(*url_safe, *length),
-        GenerateCommands::Password { length, count } => password(*length, *count),
+        GenerateCommands::Bytes { length } => bytes(length),
+        GenerateCommands::Hex { uppercase, length } => hex(uppercase, length),
+        GenerateCommands::Base64 { url_safe, length } => base64(url_safe, length),
+        GenerateCommands::Password { length, count } => password(length, count),
         GenerateCommands::Passphrase { path, delimiter, separator, length, count }
-            => passphrase(path, delimiter, separator, *length, *count),
-        GenerateCommands::Username { command } => username(command),
-        GenerateCommands::Digits { length, count } => digits(*length, *count),
-        GenerateCommands::Number { minimum, maximum, count } => number(*minimum, *maximum, *count)
+            => passphrase(&path, &delimiter, &separator, length, count),
+        GenerateCommands::Username { command } => username(&command),
+        GenerateCommands::Digits { length, count } => digits(length, count),
+        GenerateCommands::Number { minimum, maximum, count } => number(minimum, maximum, count)
     }
 }

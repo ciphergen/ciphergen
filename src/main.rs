@@ -10,5 +10,5 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     env_logger::builder().filter_level(level).init();
 
-    execute(&arguments)
+    execute(arguments)
 }
