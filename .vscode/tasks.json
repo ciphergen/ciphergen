@@ -24,6 +24,22 @@
 				"isDefault": true
 			},
 			"label": "Test"
+		},
+		{
+			"type": "cargo",
+			"command": "check",
+			"problemMatcher": [
+				"$rustc"
+			],
+			"label": "Check"
+		},
+		{
+			"type": "cargo",
+			"command": "clean",
+			"problemMatcher": [
+				"$rustc"
+			],
+			"label": "Clean"
 		}
 	]
 }
