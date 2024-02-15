@@ -58,14 +58,18 @@ pub fn analyze(buffer: Vec<u8>) -> String {
 pub fn shannon_entropy(buffer: &Vec<u8>) -> f64 {
     let length = buffer.len() as f64;
     let histogram = buffer.iter().fold(
-        HashMap::new(), |mut acc, e| {
-            *acc.entry(e).or_insert(0) = *acc.entry(e).or_insert(0) + 1;
-            acc
+        HashMap::new(),
+        |mut accumulator: HashMap<_, i32>, key| {
+            *accumulator.entry(key).or_insert(0) = *accumulator.entry(key).or_insert(0) + 1;
+            accumulator
         }
     );
 
-    histogram.values().fold(0f64, |ac, &x| {
-        let f = x as f64 / length;
-        ac - (f * f.log2())
-    })
+    histogram.values().fold(
+        0f64,
+        |accumulator, &element| {
+            let value = element as f64 / length;
+            accumulator - (value * value.log2())
+        }
+    )
 }
