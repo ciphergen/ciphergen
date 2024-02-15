@@ -1,6 +1,5 @@
 #[cfg(test)]
 pub mod tests;
-pub mod letters;
 pub mod binary;
 pub mod password;
 pub mod passphrase;
