@@ -121,7 +121,7 @@ pub enum UsernameCommands {
         count: Option<u64>
     },
     /// Generate a complex pronounceable username that is constructed from syllables
-    Syllabic {
+    Complex {
         /// The number of syllables to generate
         length: u64,
 

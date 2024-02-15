@@ -138,7 +138,7 @@ fn username(command: &UsernameCommands) -> Result<Vec<u8>, GenerateError> {
 
             Ok(output)
         }
-        UsernameCommands::Syllabic { length, count } => {
+        UsernameCommands::Complex { length, count } => {
             let max = count.unwrap_or(1);
 
             if max == 0 { return Err(GenerateError::InvalidLength(max)); }
