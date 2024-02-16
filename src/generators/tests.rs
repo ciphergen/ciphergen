@@ -137,6 +137,15 @@ fn generates_six_digits() {
 }
 
 #[test]
+fn generates_one_million_digits() {
+    let bytes = generate_digits(1000000);
+    let string = from_utf8(&bytes).unwrap();
+
+    assert_eq!(string.chars().count(), 1000000)
+}
+
+
+#[test]
 fn generates_zero_digits() {
     let bytes = generate_digits(0);
 

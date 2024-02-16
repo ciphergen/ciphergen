@@ -1,12 +1,16 @@
-use rand::{Rng, thread_rng};
+use rand::{thread_rng, Rng};
 
 pub fn generate_digits(length: u64) -> Vec<u8> {
     if length == 0 { return Vec::<u8>::new(); }
 
-    let radix = 10.0f64;
-    let offset = length - 1;
-    let maximum = radix.powi(length as i32) as u64;
-    let minimum = radix.powi(offset as i32) as u64;
+    let mut output = String::new();
 
-    thread_rng().gen_range(minimum..maximum).to_string().into_bytes()
+    for _ in 0..length {
+        let digit = thread_rng().gen_range(0..=9);
+        let character = char::from_digit(digit, 10).unwrap();
+
+        output.push(character);
+    }
+
+    output.into_bytes()
 }
