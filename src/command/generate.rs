@@ -1,38 +1,26 @@
 use std::fmt;
 use std::fs::read_to_string;
 
-use crate::generators::binary::{generate_bytes, generate_hex, generate_base64, GenerateBytesError};
-use crate::generators::password::{generate_password, GeneratePasswordError};
+use crate::generators::binary::{generate_bytes, generate_hex, generate_base64};
+use crate::generators::password::generate_password;
 use crate::generators::passphrase::{generate_passphrase, GeneratePassphraseError};
-use crate::generators::username::{generate_simple_username, generate_syllabic_username, GenerateUsernameError};
-use crate::generators::digits::{generate_digits, GenerateDigitsError};
+use crate::generators::username::{generate_simple_username, generate_complex_username};
+use crate::generators::digits::generate_digits;
 use crate::generators::number::generate_number;
 
 use super::arguments::{GenerateCommands, UsernameCommands};
 
 #[derive(Debug)]
 pub enum GenerateError {
-    InvalidLength(u64),
     IO(std::io::Error),
-    Bytes(GenerateBytesError),
-    Password(GeneratePasswordError),
-    Passphrase(GeneratePassphraseError),
-    Username(GenerateUsernameError),
-    Digits(GenerateDigitsError),
-    Number
+    Passphrase(GeneratePassphraseError)
 }
 
 impl fmt::Display for GenerateError {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            GenerateError::InvalidLength(length) => { write!(formatter, "expected a positive integer but got {} instead", length) },
             GenerateError::IO(error) => write!(formatter, "{}", error),
-            GenerateError::Bytes(error) => write!(formatter, "{}", error),
-            GenerateError::Password(error) => write!(formatter, "{}", error),
-            GenerateError::Passphrase(error) => write!(formatter, "{}", error),
-            GenerateError::Username(error) => write!(formatter, "{}", error),
-            GenerateError::Digits(error) => write!(formatter, "{}", error),
-            GenerateError::Number => panic!()
+            GenerateError::Passphrase(error) => write!(formatter, "{}", error)
         }
     }
 }
@@ -40,14 +28,8 @@ impl fmt::Display for GenerateError {
 impl std::error::Error for GenerateError {
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
         match *self {
-            GenerateError::InvalidLength(_) => None,
             GenerateError::IO(ref error) => Some(error),
-            GenerateError::Bytes(ref error) => Some(error),
-            GenerateError::Password(ref error) => Some(error),
-            GenerateError::Passphrase(ref error) => Some(error),
-            GenerateError::Username(ref error) => Some(error),
-            GenerateError::Digits(ref error) => Some(error),
-            GenerateError::Number => None,
+            GenerateError::Passphrase(ref error) => Some(error)
         }
     }
 }
@@ -63,47 +45,39 @@ fn load_default_wordlist() -> Vec<String> {
     include_str!("../wordlist.txt").split('\n').map(|value| value.to_string()).collect()
 }
 
-fn bytes(length: u64) -> Result<Vec<u8>, GenerateError> {
-    let bytes = generate_bytes(length).map_err(GenerateError::Bytes)?;
-
-    Ok(bytes)
+fn bytes(length: u64) -> Vec<u8> {
+    generate_bytes(length)
 }
 
-fn hex(uppercase: bool, length: u64) -> Result<Vec<u8>, GenerateError> {
-    let hex = generate_hex(uppercase, length).map_err(GenerateError::Bytes)?;
-
-    Ok(hex)
+fn hex(uppercase: bool, length: u64) -> Vec<u8> {
+    generate_hex(uppercase, length)
 }
 
-fn base64(url_safe: bool, length: u64) -> Result<Vec<u8>, GenerateError> {
-    let base64 = generate_base64(url_safe, length).map_err(GenerateError::Bytes)?;
-
-    Ok(base64)
+fn base64(url_safe: bool, length: u64) -> Vec<u8> {
+    generate_base64(url_safe, length)
 }
 
-fn password(length: u64, count: Option<u64>) -> Result<Vec<u8>, GenerateError> {
+fn password(length: u64, count: Option<u64>) -> Vec<u8> {
     let max = count.unwrap_or(1);
-
-    if max == 0 { return Err(GenerateError::InvalidLength(max)); }
-
     let mut output = Vec::<u8>::new();
 
+    if max == 0 { return output; }
+
     for _ in 0..max {
-        let mut value = generate_password(length).map_err(GenerateError::Password)?;
+        let mut value = generate_password(length);
 
         output.append(&mut value);
         output.push(b'\n');
     }
 
-    Ok(output)
+    output
 }
 
 fn passphrase(path: &Option<String>, delimiter: &String, separator: &String, length: u64, count: Option<u64>) -> Result<Vec<u8>, GenerateError> {
     let max = count.unwrap_or(1);
-
-    if max == 0 { return Err(GenerateError::InvalidLength(max)); }
-
     let mut output = Vec::<u8>::new();
+
+    if max == 0 { return Ok(output); }
 
     let wordlist = match path {
         Some(value) => load_wordlist(value, delimiter)?,
@@ -120,87 +94,83 @@ fn passphrase(path: &Option<String>, delimiter: &String, separator: &String, len
     Ok(output)
 }
 
-fn username(command: &UsernameCommands) -> Result<Vec<u8>, GenerateError> {
+fn username(command: &UsernameCommands) -> Vec<u8> {
     match *command {
         UsernameCommands::Simple { length, count } => {
             let max = count.unwrap_or(1);
-
-            if max == 0 { return Err(GenerateError::InvalidLength(max)); }
-
             let mut output = Vec::<u8>::new();
 
+            if max == 0 { return output; }
+
             for _ in 0..max {
-                let mut value = generate_simple_username(length).map_err(GenerateError::Username)?;
+                let mut value = generate_simple_username(length);
 
                 output.append(&mut value);
                 output.push(b'\n');
             }
 
-            Ok(output)
+            output
         }
         UsernameCommands::Complex { length, count } => {
             let max = count.unwrap_or(1);
-
-            if max == 0 { return Err(GenerateError::InvalidLength(max)); }
-
             let mut output = Vec::<u8>::new();
 
+            if max == 0 { return output; }
+
             for _ in 0..max {
-                let mut value = generate_syllabic_username(length).map_err(GenerateError::Username)?;
+                let mut value = generate_complex_username(length);
 
                 output.append(&mut value);
                 output.push(b'\n');
             }
 
-            Ok(output)
+            output
         }
     }
 }
 
-fn digits(length: u64, count: Option<u64>) -> Result<Vec<u8>, GenerateError> {
+fn digits(length: u64, count: Option<u64>) -> Vec<u8> {
     let max = count.unwrap_or(1);
-
-    if max == 0 { return Err(GenerateError::InvalidLength(max)); }
-
     let mut output = Vec::<u8>::new();
 
+    if max == 0 { return output; }
+
     for _ in 0..max {
-        let mut value = generate_digits(length).map_err(GenerateError::Digits)?;
+        let mut value = generate_digits(length);
 
         output.append(&mut value);
         output.push(b'\n');
     }
 
-    Ok(output)
+    output
 }
 
-fn number(minimum: u64, maximum: u64, count: Option<u64>) -> Result<Vec<u8>, GenerateError> {
+fn number(minimum: u64, maximum: u64, count: Option<u64>) -> Vec<u8> {
     let max = count.unwrap_or(1);
-
-    if max == 0 { return Err(GenerateError::InvalidLength(max)); }
-
     let mut output = Vec::<u8>::new();
 
+    if max == 0 { return output; }
+
     for _ in 0..max {
-        let mut value = generate_number(minimum, maximum).map_err(|_| GenerateError::Number)?;
+        let mut value = generate_number(minimum, maximum);
 
         output.append(&mut value);
         output.push(b'\n');
     }
 
-    Ok(output)
+    output
 }
 
 pub fn generate(command: GenerateCommands) -> Result<Vec<u8>, GenerateError> {
     match command {
-        GenerateCommands::Bytes { length } => bytes(length),
-        GenerateCommands::Hex { uppercase, length } => hex(uppercase, length),
-        GenerateCommands::Base64 { url_safe, length } => base64(url_safe, length),
-        GenerateCommands::Password { length, count } => password(length, count),
+        GenerateCommands::Bytes { length } => Ok(bytes(length)),
+        GenerateCommands::Hex { uppercase, length } => Ok(hex(uppercase, length)),
+        GenerateCommands::Base64 { url_safe, length } => Ok(base64(url_safe, length)),
+        GenerateCommands::Password { length, count } => Ok(password(length, count)),
         GenerateCommands::Passphrase { path, delimiter, separator, length, count }
             => passphrase(&path, &delimiter, &separator, length, count),
-        GenerateCommands::Username { command } => username(&command),
-        GenerateCommands::Digits { length, count } => digits(length, count),
-        GenerateCommands::Number { minimum, maximum, count } => number(minimum, maximum, count)
+        GenerateCommands::Username { command } => Ok(username(&command)),
+        GenerateCommands::Digits { length, count } => Ok(digits(length, count)),
+        GenerateCommands::Number { minimum, maximum, count } => Ok(number(minimum, maximum, count))
     }
 }

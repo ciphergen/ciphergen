@@ -1,29 +1,7 @@
-use std::fmt;
 use rand::{random, thread_rng, Rng};
 use rand::rngs::ThreadRng;
 use rand::distributions::{Distribution, Standard};
 use rand::seq::SliceRandom;
-
-#[derive(Debug)]
-pub enum GenerateUsernameError {
-    InvalidLength(u64)
-}
-
-impl fmt::Display for GenerateUsernameError {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            GenerateUsernameError::InvalidLength(length) => { write!(formatter, "expected a positive integer but got {} instead", length) }
-        }
-    }
-}
-
-impl std::error::Error for GenerateUsernameError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match *self {
-            GenerateUsernameError::InvalidLength(_) => None
-        }
-    }
-}
 
 const VOWELS: [char; 6] = [
     'a', 'e', 'i',
@@ -94,8 +72,8 @@ impl Distribution<SyllableType> for Standard {
 ///
 /// Usernames created in this fashion are guaranteed to be pronouncable,
 /// but are likely to be flagged as suspicious by automated tools and may not be aesthetically pleasing.
-pub fn generate_simple_username(length: u64) -> Result<Vec<u8>, GenerateUsernameError> {
-    if length == 0 { return Err(GenerateUsernameError::InvalidLength(length)); }
+pub fn generate_simple_username(length: u64) -> Vec<u8> {
+    if length == 0 { return Vec::<u8>::new(); }
 
     let mut output: Vec<char> = Vec::new();
     let rng = &mut thread_rng();
@@ -108,7 +86,7 @@ pub fn generate_simple_username(length: u64) -> Result<Vec<u8>, GenerateUsername
     }
 
     // If only one character is needed, then we are done.
-    if length == 1 { return Ok(output.iter().collect::<String>().into_bytes()); }
+    if length == 1 { return output.iter().collect::<String>().into_bytes(); }
 
     // Alternate between adding consonants and vowels
     for index in 0..(length - 1) {
@@ -119,20 +97,20 @@ pub fn generate_simple_username(length: u64) -> Result<Vec<u8>, GenerateUsername
         }
     }
 
-    Ok(output.iter().collect::<String>().into_bytes())
+    output.iter().collect::<String>().into_bytes()
 }
 
 /// Generate a pronounceable username from random syllables.
 ///
 /// Syllabic usernames are less likely to be flagged as suspicious by automated tools,
 /// and may be more aesthetically pleasing.
-pub fn generate_syllabic_username(count: u64) -> Result<Vec<u8>, GenerateUsernameError> {
-    if count == 0 { return Err(GenerateUsernameError::InvalidLength(count)); }
+pub fn generate_complex_username(length: u64) -> Vec<u8> {
+    if length == 0 { return Vec::<u8>::new(); }
 
     let rng = &mut thread_rng();
     let mut output = String::new();
 
-    for _ in 0..count {
+    for _ in 0..length {
         // Generate a random syllable of a random type.
         match random::<SyllableType>() {
             SyllableType::CLOSED => output += &create_closed_syllable(rng),
@@ -140,5 +118,5 @@ pub fn generate_syllabic_username(count: u64) -> Result<Vec<u8>, GenerateUsernam
         }
     }
 
-    Ok(output.into_bytes())
+    output.into_bytes()
 }
