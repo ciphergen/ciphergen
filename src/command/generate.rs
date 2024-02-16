@@ -63,11 +63,12 @@ fn password(length: u64, count: Option<u64>) -> Vec<u8> {
 
     if max == 0 { return output; }
 
-    for _ in 0..max {
+    for index in 0..max {
         let mut value = generate_password(length);
 
         output.append(&mut value);
-        output.push(b'\n');
+
+        if index < max - 1 { output.push(b'\n'); }
     }
 
     output
@@ -84,11 +85,12 @@ fn passphrase(path: &Option<String>, delimiter: &String, separator: &String, len
         None => load_default_wordlist(),
     };
 
-    for _ in 0..max {
+    for index in 0..max {
         let mut value = generate_passphrase(&wordlist, &separator, length).map_err(GenerateError::Passphrase)?;
 
         output.append(&mut value);
-        output.push(b'\n');
+
+        if index < max - 1 { output.push(b'\n'); }
     }
 
     Ok(output)
@@ -102,11 +104,12 @@ fn username(command: &UsernameCommands) -> Vec<u8> {
 
             if max == 0 { return output; }
 
-            for _ in 0..max {
+            for index in 0..max {
                 let mut value = generate_simple_username(length);
 
                 output.append(&mut value);
-                output.push(b'\n');
+
+                if index < max - 1 { output.push(b'\n'); }
             }
 
             output
@@ -117,11 +120,12 @@ fn username(command: &UsernameCommands) -> Vec<u8> {
 
             if max == 0 { return output; }
 
-            for _ in 0..max {
+            for index in 0..max {
                 let mut value = generate_complex_username(length);
 
                 output.append(&mut value);
-                output.push(b'\n');
+
+                if index < max - 1 { output.push(b'\n'); }
             }
 
             output
@@ -135,11 +139,12 @@ fn digits(length: u64, count: Option<u64>) -> Vec<u8> {
 
     if max == 0 { return output; }
 
-    for _ in 0..max {
+    for index in 0..max {
         let mut value = generate_digits(length);
 
         output.append(&mut value);
-        output.push(b'\n');
+
+        if index < max - 1 { output.push(b'\n'); }
     }
 
     output
@@ -151,11 +156,12 @@ fn number(minimum: u64, maximum: u64, count: Option<u64>) -> Vec<u8> {
 
     if max == 0 { return output; }
 
-    for _ in 0..max {
+    for index in 0..max {
         let mut value = generate_number(minimum, maximum);
 
         output.append(&mut value);
-        output.push(b'\n');
+
+        if index < max - 1 { output.push(b'\n'); }
     }
 
     output
