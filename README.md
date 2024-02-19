@@ -64,7 +64,7 @@ ciphergen generate digits 4
 For a batch of ten, six-digit PINs:
 
 ```sh
-ciphergen generate digits 4 10
+ciphergen generate digits 6 10
 ```
 
 ## Passwords
@@ -92,7 +92,7 @@ ciphergen generate passphrase 4
 To generate a batch of ten, six-word passphrases:
 
 ```sh
-ciphergen generate passphrase 4 10
+ciphergen generate passphrase 6 10
 ```
 
 ## Usernames
@@ -103,7 +103,7 @@ To generate a simple username (alternating vowels and consonants) of six charact
 ciphergen generate username simple 6
 ```
 
-A batch of 10 simple usernames of 8 characters:
+A batch of 10 simple usernames of eight characters:
 
 ```sh
 ciphergen generate username simple 8 10
@@ -121,7 +121,7 @@ Or, for a batch of 10 complex usernames of two syllables:
 ciphergen generate username complex 2 10
 ```
 
-Note that, in this case, the first numeric argument refers to the number of *syllables*, not *characters*, to be generated.
+Note that, in the case of complex usernames, the first numeric argument refers to the number of *syllables*, not *characters*, to be generated.
 
 ## Analysis
 
