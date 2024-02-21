@@ -43,8 +43,8 @@ jobs:
           TAG: ${{ github.REF_NAME }}
         run: |
           gh release create $TAG \
-            "ciphergen-linux-x86_64-${{ github.SHA }}*#Linux (x86_64)" \
-            "ciphergen-windows-x86_64-${{ github.SHA }}*#Windows (x86_64)" \
+            "x86_64-unknown-linux-gnu/release/ciphergen#Linux (x86_64)" \
+            "x86_64-pc-windows-msvc/release/ciphergen.exe#Windows (x86_64)" \
             "README.md" \
             "LICENSE" \
             --repo $REPOSITORY \
