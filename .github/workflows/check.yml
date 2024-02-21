@@ -12,28 +12,54 @@ env:
     target/
 
 jobs:
-  check:
-    name: Check
+  check-linux:
+    name: Check Linux
     runs-on: ubuntu-latest
     steps:
       - name: Cache
         uses: actions/cache@v3
         with:
           path: ${{ env.CACHE_PATHS }}
-          key: check-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
+          key: check-${{ runner.OS }}-${{ hashFiles('**/Cargo.lock') }}
       - name: Checkout
         uses: actions/checkout@v3
       - name: Check
         run: cargo check
-  test:
-    name: Test
+  check-windows:
+    name: Check Windows
+    runs-on: windows-latest
+    steps:
+      - name: Cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.CACHE_PATHS }}
+          key: check-${{ runner.OS }}-${{ hashFiles('**/Cargo.lock') }}
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Check
+        run: cargo check
+  test-linux:
+    name: Test Linux
     runs-on: ubuntu-latest
     steps:
       - name: Cache
         uses: actions/cache@v3
         with:
           path: ${{ env.CACHE_PATHS }}
-          key: test-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
+          key: test-${{ runner.OS }}-${{ hashFiles('**/Cargo.lock') }}
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Test
+        run: cargo test
+  test-windows:
+    name: Test Windows
+    runs-on: windows-latest
+    steps:
+      - name: Cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.CACHE_PATHS }}
+          key: test-${{ runner.OS }}-${{ hashFiles('**/Cargo.lock') }}
       - name: Checkout
         uses: actions/checkout@v3
       - name: Test

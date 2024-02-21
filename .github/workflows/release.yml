@@ -1,0 +1,39 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - ^v?([0-9]+)\.([0-9]+)\.([0-9]+)$
+
+env:
+  ARTIFACT_NAME: ciphergen-${{ github.REF_NAME }}-${{ github.RUN_ID }}-${{ github.RUN_ATTEMPT }}
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build
+    uses: ./.github/workflows/build.yml
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v3
+        path: "${{ env.ARTIFACT_NAME }}-Linux-x86_64"
+      - uses: actions/download-artifact@v3
+        path: "${{ env.ARTIFACT_NAME }}-Windows-x86_64"
+      - name: Create Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPOSITORY: ${{ github.REPOSITORY }}
+          TAG: ${{ github.REF_NAME }}
+        run: |
+          gh release create $TAG \
+            "${{ env.ARTIFACT_NAME }}-Linux-x86_64#Linux x86_64" \
+            "${{ env.ARTIFACT_NAME }}-Windows-x86_64#Windows x86_64" \
+            --repo $REPOSITORY \
+            --title "${TAG#v}" \
+            --generate-notes \
+            --verify-tag \
+            --latest
