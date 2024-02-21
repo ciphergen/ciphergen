@@ -20,11 +20,11 @@ jobs:
       - name: Download Linux Artifacts
         uses: actions/download-artifact@v3
         with:
-          path: ciphergen-linux-x86_64-${{ github.SHA }}
+          name: ciphergen-linux-x86_64-${{ github.SHA }}
       - name: Download Windows Artifacts
         uses: actions/download-artifact@v3
         with:
-          path: ciphergen-windows-x86_64-${{ github.SHA }}
+          name: ciphergen-windows-x86_64-${{ github.SHA }}
       - name: Create Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
