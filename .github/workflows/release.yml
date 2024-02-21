@@ -20,9 +20,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v3
-        path: "${{ env.ARTIFACT_NAME }}-Linux-x86_64"
+        with:
+          path: "${{ env.ARTIFACT_NAME }}-Linux-x86_64"
       - uses: actions/download-artifact@v3
-        path: "${{ env.ARTIFACT_NAME }}-Windows-x86_64"
+        with:
+          path: "${{ env.ARTIFACT_NAME }}-Windows-x86_64"
       - name: Create Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
