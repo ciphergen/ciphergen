@@ -5,9 +5,6 @@ on:
     tags:
       - 'v[0-9]+.[0-9]+.[0-9]+'
 
-env:
-  ARTIFACT_NAME: ciphergen-${{ github.REF_NAME }}-${{ github.RUN_ID }}-${{ github.RUN_ATTEMPT }}
-
 permissions:
   contents: write
 
@@ -19,12 +16,14 @@ jobs:
     name: Release
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v3
+      - name: Download Linux Artifacts
+        uses: actions/download-artifact@v3
         with:
-          path: "${{ env.ARTIFACT_NAME }}-Linux-x86_64"
-      - uses: actions/download-artifact@v3
+          path: ciphergen-linux-x86_64-${{ github.SHA }}
+      - name: Download Windows Artifacts
+        uses: actions/download-artifact@v3
         with:
-          path: "${{ env.ARTIFACT_NAME }}-Windows-x86_64"
+          path: ciphergen-windows-x86_64-${{ github.SHA }}
       - name: Create Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -32,8 +31,8 @@ jobs:
           TAG: ${{ github.REF_NAME }}
         run: |
           gh release create $TAG \
-            "${{ env.ARTIFACT_NAME }}-Linux-x86_64#Linux x86_64" \
-            "${{ env.ARTIFACT_NAME }}-Windows-x86_64#Windows x86_64" \
+            "ciphergen-linux-x86_64-${{ github.SHA }}*#Linux (x86_64)" \
+            "ciphergen-windows-x86_64-${{ github.SHA }}*#Windows (x86_64)" \
             --repo $REPOSITORY \
             --title "${TAG#v}" \
             --generate-notes \
