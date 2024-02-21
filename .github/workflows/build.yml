@@ -39,7 +39,6 @@ jobs:
   build-windows:
     name: Build Windows
     runs-on: windows-latest
-    needs: check
     steps:
       - name: Cache
         uses: actions/cache@v3
