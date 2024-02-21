@@ -1,6 +1,6 @@
 name: Build
 
-on: [ push, workflow_call ]
+on: workflow_call
 
 env:
   CARGO_TERM_COLOR: always
@@ -12,9 +12,6 @@ env:
     target/
 
 jobs:
-  check:
-    name: Check
-    uses: ./.github/workflows/check.yml
   build-linux:
     name: Build Linux
     runs-on: ubuntu-latest

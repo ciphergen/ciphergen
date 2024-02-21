@@ -1,0 +1,17 @@
+name: Validate
+
+on:
+  push:
+    branches:
+      - '*'
+  pull_request:
+    branches:
+      - '*'
+
+jobs:
+  check:
+    name: Check
+    uses: ./.github/workflows/check.yml
+  test:
+    name: Test
+    uses: ./.github/workflows/test.yml

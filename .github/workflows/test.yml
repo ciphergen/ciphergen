@@ -1,4 +1,4 @@
-name: Check
+name: Test
 
 on: workflow_call
 
@@ -12,29 +12,29 @@ env:
     target/
 
 jobs:
-  check-linux:
-    name: Check Linux
+  test-linux:
+    name: Test Linux
     runs-on: ubuntu-latest
     steps:
       - name: Cache
         uses: actions/cache@v3
         with:
           path: ${{ env.CACHE_PATHS }}
-          key: check-${{ runner.OS }}-${{ hashFiles('**/Cargo.lock') }}
+          key: test-${{ runner.OS }}-${{ hashFiles('**/Cargo.lock') }}
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Check
-        run: cargo check
-  check-windows:
-    name: Check Windows
+      - name: Test
+        run: cargo test
+  test-windows:
+    name: Test Windows
     runs-on: windows-latest
     steps:
       - name: Cache
         uses: actions/cache@v3
         with:
           path: ${{ env.CACHE_PATHS }}
-          key: check-${{ runner.OS }}-${{ hashFiles('**/Cargo.lock') }}
+          key: test-${{ runner.OS }}-${{ hashFiles('**/Cargo.lock') }}
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Check
-        run: cargo check
+      - name: Test
+        run: cargo test
