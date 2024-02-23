@@ -20,7 +20,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ${{ env.CACHE_PATHS }}
-          key: test-${{ runner.OS }}-${{ hashFiles('../../Cargo.lock') }}
+          key: test-${{ runner.OS }}-${{ hashFiles('**/Cargo.lock') }}
       - name: Checkout
         uses: actions/checkout@v3
       - name: Test
@@ -33,7 +33,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ${{ env.CACHE_PATHS }}
-          key: test-${{ runner.OS }}-${{ hashFiles('../../Cargo.lock') }}
+          key: test-${{ runner.OS }}-${{ hashFiles('**/Cargo.lock') }}
       - name: Checkout
         uses: actions/checkout@v3
       - name: Test

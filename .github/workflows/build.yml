@@ -20,7 +20,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ${{ env.CACHE_PATHS }}
-          key: build-${{ runner.OS }}-${{ hashFiles('../../Cargo.lock') }}
+          key: build-${{ runner.OS }}-${{ hashFiles('**/Cargo.lock') }}
       - name: Checkout
         uses: actions/checkout@v3
       - name: Update Toolchains
@@ -44,7 +44,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ${{ env.CACHE_PATHS }}
-          key: build-${{ runner.OS }}-${{ hashFiles('../../Cargo.lock') }}
+          key: build-${{ runner.OS }}-${{ hashFiles('**/Cargo.lock') }}
       - name: Checkout
         uses: actions/checkout@v3
       - name: Update Toolchains
