@@ -49,7 +49,6 @@ jobs:
           gh release create $TAG \
             "ciphergen-linux-x86_64.zip#Linux x86_64" \
             "ciphergen-windows-x86_64.zip#Windows x86_64" \
-            --repo $REPOSITORY \
             --title "${TAG#v}" \
             --notes-from-tag \
             --verify-tag \
