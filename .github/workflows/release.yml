@@ -36,6 +36,10 @@ jobs:
           name: ciphergen-windows-x86_64-${{ github.SHA }}
       - name: List Local Files
         run: tree -a .
+      - name: Create Binary Distributions
+        run: |
+          zip -jr ciphergen-linux-x86_64.zip x86_64-unknown-linux-gnu/release/ciphergen README.md LICENSE
+          zip -jr ciphergen-windows-x86_64.zip x86_64-pc-windows-msvc/release/ciphergen.exe README.md LICENSE
       - name: Create Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -43,12 +47,10 @@ jobs:
           TAG: ${{ github.REF_NAME }}
         run: |
           gh release create $TAG \
-            "x86_64-unknown-linux-gnu/release/ciphergen#Linux (x86_64)" \
-            "x86_64-pc-windows-msvc/release/ciphergen.exe#Windows (x86_64)" \
-            "README.md" \
-            "LICENSE" \
+            "ciphergen-linux-x86_64.zip#Linux x86_64" \
+            "ciphergen-windows-x86_64.zip#Windows x86_64" \
             --repo $REPOSITORY \
             --title "${TAG#v}" \
-            --generate-notes \
+            --notes-from-tag \
             --verify-tag \
             --latest
