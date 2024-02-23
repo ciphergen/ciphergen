@@ -1,14 +1,23 @@
 mod generators;
 mod command;
+mod wordlist;
+
+use std::io::Write;
 
 use command::{arguments::parse, execute::execute};
-use log::LevelFilter::{Warn, Info, Debug};
+use log::LevelFilter::{Warn, Info, Trace, Error};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let arguments = parse();
-    let level = if arguments.verbosity.verbose { Debug } else if arguments.verbosity.quiet { Warn } else { Info };
+    let mut builder = env_logger::builder();
 
-    env_logger::builder().filter_level(level).init();
+    if arguments.verbosity.debug { builder.filter_level(Trace); }
+    else if arguments.verbosity.verbose { builder.filter_level(Info); }
+    else if arguments.verbosity.quiet { builder.filter_level(Error); }
+    else { builder.filter_level(Warn); };
+
+    builder.format(|buffer, record| writeln!(buffer, "{}", record.args()));
+    builder.init();
 
     execute(arguments)
 }

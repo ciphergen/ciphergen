@@ -1,5 +1,4 @@
 use std::fmt;
-use std::fs::read_to_string;
 
 use crate::generators::binary::{generate_bytes, generate_hex, generate_base64};
 use crate::generators::password::generate_password;
@@ -7,6 +6,7 @@ use crate::generators::passphrase::{generate_passphrase, GeneratePassphraseError
 use crate::generators::username::{generate_simple_username, generate_complex_username};
 use crate::generators::digits::generate_digits;
 use crate::generators::number::generate_number;
+use crate::wordlist::{load_wordlist, load_default_wordlist};
 
 use super::arguments::{GenerateCommands, UsernameCommands};
 
@@ -32,17 +32,6 @@ impl std::error::Error for GenerateError {
             GenerateError::Passphrase(ref error) => Some(error)
         }
     }
-}
-
-fn load_wordlist(path: &String, delimiter: &String) -> Result<Vec<String>, GenerateError> {
-    let input = read_to_string(path).map_err(GenerateError::IO)?;
-    let wordlist = input.split(delimiter).map(|value| value.to_string()).collect();
-
-    Ok(wordlist)
-}
-
-fn load_default_wordlist() -> Vec<String> {
-    include_str!("../wordlist.txt").split('\n').map(|value| value.to_string()).collect()
 }
 
 fn bytes(length: u64) -> Vec<u8> {
@@ -81,7 +70,7 @@ fn passphrase(path: &Option<String>, delimiter: &String, separator: &String, len
     if max == 0 { return Ok(output); }
 
     let wordlist = match path {
-        Some(value) => load_wordlist(value, delimiter)?,
+        Some(value) => load_wordlist(value, delimiter).map_err(GenerateError::IO)?,
         None => load_default_wordlist(),
     };
 

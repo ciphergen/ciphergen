@@ -14,6 +14,9 @@ pub struct Arguments {
 #[derive(Args)]
 #[group(multiple = false)]
 pub struct Verbosity {
+    #[arg(short = 'd', long = "debug", help = "Enable debugging output", global = true)]
+    pub debug: bool,
+
     #[arg(short = 'v', long = "verbose", help = "Enable verbose output", global = true)]
     pub verbose: bool,
 
@@ -72,7 +75,7 @@ pub enum GenerateCommands {
         #[arg(short = 'p', long = "path", help = "The wordlist file to read into memory")]
         path: Option<String>,
 
-        #[arg(short = 'd', long = "delimiter", help = "The string used to separate words from each other in the wordlist", default_value = "\n")]
+        #[arg(short = 'D', long = "delimiter", help = "The string used to separate words from each other in the wordlist", default_value = "\n")]
         delimiter: String,
 
         #[arg(short = 's', long = "separator", help = "A string used to separate words in the passphrase", default_value = " ")]
