@@ -35,7 +35,7 @@ pub fn generate_passphrase(wordlist: &[String], separator: &String, length: u64)
     let words = thread_rng()
         .sample_iter(distribution)
         .take(length as usize)
-        .map(|value| value.clone())
+        .map(|value| value.to_owned())
         .collect::<Vec<String>>();
     let count = words.len();
 

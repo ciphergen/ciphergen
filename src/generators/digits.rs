@@ -1,16 +1,14 @@
-use rand::{thread_rng, Rng};
+use rand::{distributions::Uniform, thread_rng, Rng};
 
 pub fn generate_digits(length: u64) -> Vec<u8> {
     if length == 0 { return Vec::<u8>::new(); }
 
-    let mut output = String::new();
+    let distribution = Uniform::new_inclusive(0, 9);
 
-    for _ in 0..length {
-        let digit = thread_rng().gen_range(0..=9);
-        let character = char::from_digit(digit, 10).unwrap();
-
-        output.push(character);
-    }
-
-    output.into_bytes()
+    thread_rng()
+        .sample_iter(distribution)
+        .take(length as usize)
+        .map(|value| char::from_digit(value, 10).unwrap())
+        .collect::<String>()
+        .into_bytes()
 }
