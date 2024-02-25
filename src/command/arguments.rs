@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use clap::{Parser, Subcommand, Args};
 
 #[derive(Parser)]
@@ -34,8 +36,8 @@ pub enum Commands {
     },
     /// Cryptographically analyze a piece of data
     Analyze {
-        /// The data to analyze, or leave empty to read from STDIN
-        input: Option<String>
+        /// A path to a file on a filesystem, or leave empty to read from STDIN
+        input: Option<PathBuf>
     }
 }
 

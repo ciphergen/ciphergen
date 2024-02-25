@@ -1,4 +1,7 @@
+use std::fs::read;
 use std::io::{stdin, stdout, Read, Write};
+
+use log::error;
 
 use super::analyze::analyze;
 use super::arguments::{Arguments, Commands};
@@ -16,17 +19,18 @@ pub fn execute(arguments: Arguments) -> Result<(), Box<dyn std::error::Error>> {
             Ok(())
         }
         Commands::Analyze { input } => {
-            let mut stdin = stdin();
             let mut buffer = Vec::<u8>::new();
 
             match input {
                 Some(value) => {
-                    buffer = value.as_bytes().to_vec();
+                    buffer = read(value)?;
                 },
                 None => {
-                    stdin.read_to_end(&mut buffer)?;
+                    stdin().read_to_end(&mut buffer)?;
                 }
             };
+
+            if buffer.is_empty() { error!("There is no data to read") }
 
             println!("{}", analyze(buffer));
 

@@ -5,9 +5,9 @@ mod wordlist;
 use std::io::Write;
 
 use command::{arguments::parse, execute::execute};
-use log::LevelFilter::{Warn, Info, Trace, Error};
+use log::{LevelFilter::{Warn, Info, Trace, Error}, error};
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
+fn main() {
     let arguments = parse();
     let mut builder = env_logger::builder();
 
@@ -19,5 +19,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     builder.format(|buffer, record| writeln!(buffer, "{}", record.args()));
     builder.init();
 
-    execute(arguments)
+    if let Some(error) = execute(arguments).err() {
+        error!("Error: {}", error);
+    };
 }

@@ -1,12 +1,11 @@
+use bytesize::ByteSize;
 use core::fmt;
-use std::collections::HashMap;
-use tabled::builder::Builder;
 use digest::Digest;
+use hex::encode;
 use md5::Md5;
 use sha1::Sha1;
 use sha2::{Sha256, Sha512};
-use bytesize::ByteSize;
-use hex::encode;
+use tabled::builder::Builder;
 
 struct Report {
     size: String,
@@ -33,6 +32,7 @@ impl fmt::Display for Report {
 }
 
 pub fn analyze(buffer: Vec<u8>) -> String {
+    let length = buffer.len();
     let mut md5 = Md5::new();
     let mut sha1 = Sha1::new();
     let mut sha256 = Sha256::new();
@@ -43,9 +43,12 @@ pub fn analyze(buffer: Vec<u8>) -> String {
     sha256.update(&buffer);
     sha512.update(&buffer);
 
+    let shannon_entropy = shannon_entropy(&buffer);
+    let absolute_entropy = normalized_absolute_entropy(&buffer);
+
     let report = Report {
-        size: ByteSize::b(buffer.len() as u64).to_string(),
-        entropy: shannon_entropy(&buffer).to_string(),
+        size: ByteSize::b(length as u64).to_string(),
+        entropy: format!("{} (Shannon) | {} (Absolute)", shannon_entropy, absolute_entropy),
         md5: encode(md5.finalize()),
         sha1: encode(sha1.finalize()),
         sha256: encode(sha256.finalize()),
@@ -55,21 +58,67 @@ pub fn analyze(buffer: Vec<u8>) -> String {
     report.to_string()
 }
 
-pub fn shannon_entropy(buffer: &Vec<u8>) -> f64 {
-    let length = buffer.len() as f64;
-    let histogram = buffer.iter().fold(
-        HashMap::new(),
-        |mut accumulator: HashMap<_, i32>, key| {
-            *accumulator.entry(key).or_insert(0) = *accumulator.entry(key).or_insert(0) + 1;
-            accumulator
-        }
-    );
+/// Calculate the Shannon entropy.
+fn shannon_entropy(buffer: &[u8]) -> f64 {
+    let length = buffer.len();
+    let mut entropy = 0.0_f64;
+    let mut counts = [0_u64; 256];
 
-    histogram.values().fold(
-        0f64,
-        |accumulator, &element| {
-            let value = element as f64 / length;
-            accumulator - (value * value.log2())
-        }
-    )
+    // Create a histogram of the number of times each symbol occurred.
+    for byte in buffer { counts[*byte as usize] += 1; }
+
+    // Calculate the Shannon entropy.
+    for count in counts {
+        if count == 0 { continue; }
+
+        let value = (count as f64) / (length as f64);
+
+        entropy -= value * value.log2();
+    }
+
+    entropy
+}
+
+/// Calculate the normalized absolute entropy.
+fn normalized_absolute_entropy(buffer: &[u8]) -> f64 {
+    let length = buffer.len();
+
+    // Calculate the Shannon entropy.
+    let entropy = shannon_entropy(buffer);
+
+    // Calculate and return the normalized absolute entropy.
+    (length as f64) * entropy / 8.0
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{shannon_entropy, normalized_absolute_entropy};
+
+    #[test]
+    fn zero_bytes_has_zero_shannon_entropy() {
+        assert_eq!(shannon_entropy(b""), 0.0);
+    }
+
+    #[test]
+    fn equal_distribution_has_full_shannon_entropy() {
+        let mut bytes = [0_u8; 256];
+
+        for index in 0..256 { bytes[index] = index as u8; }
+
+        assert_eq!(shannon_entropy(&bytes), 8.0);
+    }
+
+    #[test]
+    fn zero_bytes_has_zero_absolute_entropy() {
+        assert_eq!(normalized_absolute_entropy(b""), 0.0);
+    }
+
+    #[test]
+    fn equal_distribution_has_full_absolute_entropy() {
+        let mut bytes = [0_u8; 256];
+
+        for index in 0..256 { bytes[index] = index as u8; }
+
+        assert_eq!(normalized_absolute_entropy(&bytes), 256.0);
+    }
 }
