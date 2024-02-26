@@ -125,10 +125,12 @@ Note that, in the case of complex usernames, the first numeric argument refers t
 
 ## Analysis
 
-To analyze a string:
+To read and analyze a file on the local filesystem, pass the path to the file as a positional argument to the `analyze` command. To read and analyze bytes from STDIN instead, leave the positional argument blank.
 
-```sh
-ciphergen analyze "All science is either physics or stamp collecting."
+For example, to analyze the following string:
+
+```bash
+echo -n "All science is either physics or stamp collecting." | ciphergen analyze
 ```
 
 Which will produce the following output:
@@ -137,7 +139,7 @@ Which will produce the following output:
 +---------+----------------------------------------------------------------------------------------------------------------------------------+
 | Size    | 50 B                                                                                                                             |
 +---------+----------------------------------------------------------------------------------------------------------------------------------+
-| Entropy | 3.8669575126884443                                                                                                               |
+| Entropy | 3.866957512688445 (Shannon) | 24.16848445430278 (Absolute)                                                                       |
 +---------+----------------------------------------------------------------------------------------------------------------------------------+
 | MD5     | 5d9a73410a005913e6b48599e528408d                                                                                                 |
 +---------+----------------------------------------------------------------------------------------------------------------------------------+
@@ -149,7 +151,7 @@ Which will produce the following output:
 +---------+----------------------------------------------------------------------------------------------------------------------------------+
 ```
 
-To read and analyze bytes from STDIN instead, leave the positional argument blank.
+
 
 # Contributing
 
