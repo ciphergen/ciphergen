@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use clap::{Parser, Subcommand, Args};
+use clap::{Parser, Subcommand, Args, ArgAction};
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None, arg_required_else_help = true)]
@@ -66,11 +66,17 @@ pub enum GenerateCommands {
     },
     /// Generate a random alphanumeric password
     Password {
+        #[arg(short = 'n', long = "numbers", help = "Don't include any digits", action = ArgAction::SetFalse)]
+        numbers: bool,
+
+        #[arg(short = 's', long = "symbols", help = "Don't include any symbols", action = ArgAction::SetFalse)]
+        symbols: bool,
+
         /// The number of characters to generate
-        length: u64,
+        length: usize,
 
         /// How many passwords to generate
-        count: Option<u64>
+        count: Option<usize>
     },
     /// Generate a passphrase composed of words chosen at random from a wordlist
     Passphrase {

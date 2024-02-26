@@ -46,14 +46,14 @@ fn base64(url_safe: bool, length: u64) -> Vec<u8> {
     generate_base64(url_safe, length)
 }
 
-fn password(length: u64, count: Option<u64>) -> Vec<u8> {
+fn password(numbers: bool, symbols: bool, length: usize, count: Option<usize>) -> Vec<u8> {
     let max = count.unwrap_or(1);
     let mut output = Vec::<u8>::new();
 
     if max == 0 { return output; }
 
     for index in 0..max {
-        let mut value = generate_password(length);
+        let mut value = generate_password(numbers, symbols, length);
 
         output.append(&mut value);
 
@@ -161,7 +161,8 @@ pub fn generate(command: GenerateCommands) -> Result<Vec<u8>, GenerateError> {
         GenerateCommands::Bytes { length } => Ok(bytes(length)),
         GenerateCommands::Hex { uppercase, length } => Ok(hex(uppercase, length)),
         GenerateCommands::Base64 { url_safe, length } => Ok(base64(url_safe, length)),
-        GenerateCommands::Password { length, count } => Ok(password(length, count)),
+        GenerateCommands::Password { numbers, symbols, length, count }
+            => Ok(password(numbers, symbols, length, count)),
         GenerateCommands::Passphrase { path, delimiter, separator, length, count }
             => passphrase(&path, &delimiter, &separator, length, count),
         GenerateCommands::Username { command } => Ok(username(&command)),

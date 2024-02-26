@@ -1,8 +1,30 @@
-use rand::thread_rng;
-use rand::distributions::{Alphanumeric, DistString};
+use rand::{thread_rng, Rng, distributions::Slice};
 
-pub fn generate_password(length: u64) -> Vec<u8> {
+fn split_to_characters(character_set: &str) -> Vec<char> {
+    character_set.chars().collect()
+}
+
+pub fn generate_password(numbers: bool, symbols: bool, length: usize) -> Vec<u8> {
     if length == 0 { return Vec::<u8>::new(); }
 
-    Alphanumeric.sample_string(&mut thread_rng(), length as usize).into_bytes()
+    let characters = if numbers && symbols {
+        split_to_characters("!@*-_.0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+    }
+    else if numbers {
+        split_to_characters("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+    }
+    else if symbols {
+        split_to_characters("!@*-_.abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+    }
+    else {
+        split_to_characters("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+    };
+
+    let distribution = Slice::new(&characters).unwrap();
+
+    thread_rng()
+        .sample_iter(distribution)
+        .take(length)
+        .collect::<String>()
+        .into_bytes()
 }
