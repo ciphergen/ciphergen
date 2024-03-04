@@ -12,6 +12,8 @@ use crate::wordlist::{load_wordlist, load_default_wordlist};
 
 use super::arguments::{GenerateCommands, UsernameCommands};
 
+const LINE_FEED: &[u8; 1] = b"\n";
+
 /// Repeatedly invokes an enclosure with a subrange of the initial value.
 fn while_remaining(initial: usize, closure: impl Fn(usize) -> ()) {
     const SIZE: usize = 2_usize.pow(16);
@@ -65,7 +67,7 @@ fn password(sender: Sender<Vec<u8>>, numbers: bool, symbols: bool, length: usize
 
             sender.send(buffer).unwrap();
 
-            if index < max { sender.send(b"\n".to_vec()).unwrap(); }
+            if index < max { sender.send(LINE_FEED.to_vec()).unwrap(); }
         });
     }
 }
@@ -88,7 +90,7 @@ fn passphrase(sender: Sender<Vec<u8>>, path: &Option<String>, delimiter: &String
 
                     sender.send(buffer).unwrap();
 
-                    if index < max { sender.send(b"\n".to_vec()).unwrap(); }
+                    if index < max { sender.send(LINE_FEED.to_vec()).unwrap(); }
                 });
             }
         }
@@ -109,7 +111,7 @@ fn username(sender: Sender<Vec<u8>>, command: UsernameCommands) {
 
                     sender.send(buffer).unwrap();
 
-                    if index < max { sender.send(b"\n".to_vec()).unwrap(); }
+                    if index < max { sender.send(LINE_FEED.to_vec()).unwrap(); }
                 });
             }
         }
@@ -124,7 +126,7 @@ fn username(sender: Sender<Vec<u8>>, command: UsernameCommands) {
 
                     sender.send(buffer).unwrap();
 
-                    if index < max { sender.send(b"\n".to_vec()).unwrap(); }
+                    if index < max { sender.send(LINE_FEED.to_vec()).unwrap(); }
                 });
             }
         }
@@ -142,7 +144,7 @@ fn digits(sender: Sender<Vec<u8>>, length: usize, count: Option<usize>) {
 
             sender.send(buffer).unwrap();
 
-            if index < max { sender.send(b"\n".to_vec()).unwrap(); }
+            if index < max { sender.send(LINE_FEED.to_vec()).unwrap(); }
         });
     }
 }
@@ -157,7 +159,7 @@ fn number(sender: Sender<Vec<u8>>, minimum: usize, maximum: usize, count: Option
 
         sender.send(buffer).unwrap();
 
-        if index < max { sender.send(b"\n".to_vec()).unwrap(); }
+        if index < max { sender.send(LINE_FEED.to_vec()).unwrap(); }
     }
 }
 
