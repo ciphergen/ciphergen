@@ -80,16 +80,25 @@ fn generates_empty_password() {
 #[test]
 fn generates_ten_thousand_word_passphrase() {
     let wordlist = load_test_wordlist();
-    let bytes = generate_passphrase(&wordlist, &" ".to_string(), 10000).unwrap();
+    let bytes = generate_passphrase(&wordlist, &" ".to_string(), 10000);
     let count = word_count(&bytes);
 
     assert_eq!(count, 10000)
 }
 
 #[test]
+fn generates_hundred_thousand_word_passphrase() {
+    let wordlist = load_test_wordlist();
+    let bytes = generate_passphrase(&wordlist, &" ".to_string(), 100000);
+    let count = word_count(&bytes);
+
+    assert_eq!(count, 100000)
+}
+
+#[test]
 fn generates_empty_passphrase() {
     let wordlist = load_test_wordlist();
-    let bytes = generate_passphrase(&wordlist, &" ".to_string(), 0).unwrap();
+    let bytes = generate_passphrase(&wordlist, &" ".to_string(), 0);
 
     assert_eq!(bytes.len(), 0)
 }
@@ -99,7 +108,7 @@ fn generates_empty_passphrase() {
 fn empty_wordlist_panics() {
     let wordlist = Vec::<String>::new();
 
-    generate_passphrase(&wordlist, &" ".to_string(), 1).unwrap();
+    generate_passphrase(&wordlist, &" ".to_string(), 1);
 }
 
 #[test]

@@ -1,5 +1,7 @@
 use std::fs::read;
 use std::io::{stdin, stdout, Read, Write};
+use std::sync::mpsc::channel;
+use std::thread::spawn;
 
 use log::error;
 
@@ -10,11 +12,19 @@ use super::generate::generate;
 pub fn execute(arguments: Arguments) -> Result<(), Box<dyn std::error::Error>> {
     match arguments.command {
         Commands::Generate { command } => {
-            let bytes = generate(command)?;
+            let (sender, receiver) = channel::<Vec<u8>>();
             let mut stdout = stdout();
 
-            stdout.write_all(&bytes)?;
-            stdout.flush()?;
+            let handle = spawn(move || {
+                generate(sender, command)
+            });
+
+            for message in receiver {
+                stdout.write_all(&message)?;
+                stdout.flush()?;
+            }
+
+            handle.join().unwrap();
 
             Ok(())
         }

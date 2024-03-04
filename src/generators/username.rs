@@ -72,7 +72,7 @@ impl Distribution<SyllableType> for Standard {
 ///
 /// Usernames created in this fashion are guaranteed to be pronouncable,
 /// but are likely to be flagged as suspicious by automated tools and may not be aesthetically pleasing.
-pub fn generate_simple_username(length: u64) -> Vec<u8> {
+pub fn generate_simple_username(length: usize) -> Vec<u8> {
     if length == 0 { return Vec::<u8>::new(); }
 
     let mut output: Vec<char> = Vec::new();
@@ -97,14 +97,16 @@ pub fn generate_simple_username(length: u64) -> Vec<u8> {
         }
     }
 
-    output.iter().collect::<String>().into_bytes()
+    output.iter()
+        .collect::<String>()
+        .into_bytes()
 }
 
 /// Generate a pronounceable username from random syllables.
 ///
 /// Syllabic usernames are less likely to be flagged as suspicious by automated tools,
 /// and may be more aesthetically pleasing.
-pub fn generate_complex_username(length: u64) -> Vec<u8> {
+pub fn generate_complex_username(length: usize) -> Vec<u8> {
     if length == 0 { return Vec::<u8>::new(); }
 
     let rng = &mut thread_rng();

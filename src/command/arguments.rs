@@ -46,7 +46,7 @@ pub enum GenerateCommands {
     /// Generate random bytes
     Bytes {
         /// The number of bytes to generate
-        length: u64
+        length: usize
     },
     /// Generate random bytes and encode them as a hexadecimal string
     Hex {
@@ -54,7 +54,7 @@ pub enum GenerateCommands {
         uppercase: bool,
 
         /// The number of bytes to generate
-        length: u64
+        length: usize
     },
     /// Generate random bytes and encode them as a Base64 string
     Base64 {
@@ -62,7 +62,7 @@ pub enum GenerateCommands {
         url_safe: bool,
 
         /// The number of bytes to generate
-        length: u64
+        length: usize
     },
     /// Generate a random alphanumeric password
     Password {
@@ -90,10 +90,10 @@ pub enum GenerateCommands {
         separator: String,
 
         /// The number of words to generate
-        length: u64,
+        length: usize,
 
         /// How many passphrases to generate
-        count: Option<u64>
+        count: Option<usize>
     },
     /// Generate a random pronounceable username
     Username {
@@ -103,21 +103,21 @@ pub enum GenerateCommands {
     /// Generate a random sequence of digits
     Digits {
         /// The number of digits to generate
-        length: u64,
+        length: usize,
 
         /// How many sequences of digits to generate
-        count: Option<u64>
+        count: Option<usize>
     },
     /// Generate a random number
     Number {
         /// The smallest number that can be generated
-        minimum: u64,
+        minimum: usize,
 
         /// The largest number that can be generated
-        maximum: u64,
+        maximum: usize,
 
         /// How many numbers to generate
-        count: Option<u64>
+        count: Option<usize>
     }
 }
 
@@ -126,18 +126,18 @@ pub enum UsernameCommands {
     /// Generate a simple pronounceable username that alternates between vowels and consonants
     Simple {
         /// The number of characters to generate
-        length: u64,
+        length: usize,
 
         /// How many simple usernames to generate
-        count: Option<u64>
+        count: Option<usize>
     },
     /// Generate a complex pronounceable username that is constructed from syllables
     Complex {
         /// The number of syllables to generate
-        length: u64,
+        length: usize,
 
         /// How many syllabic usernames to generate
-        count: Option<u64>
+        count: Option<usize>
     }
 }
 
