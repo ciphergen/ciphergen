@@ -1,5 +1,6 @@
 use std::fs::read;
 use std::io::{stdin, stdout, Read, Write};
+use std::process::exit;
 use std::sync::mpsc::channel;
 use std::thread::spawn;
 
@@ -21,8 +22,9 @@ pub fn execute(arguments: Arguments) -> Result<(), Box<dyn std::error::Error>> {
 
             for message in receiver {
                 stdout.write_all(&message)?;
-                stdout.flush()?;
             }
+
+            stdout.flush()?;
 
             handle.join().unwrap();
 
@@ -40,7 +42,10 @@ pub fn execute(arguments: Arguments) -> Result<(), Box<dyn std::error::Error>> {
                 }
             };
 
-            if buffer.is_empty() { error!("There is no data to read") }
+            if buffer.is_empty() {
+                error!("There is no data to read");
+                exit(-1);
+             }
 
             println!("{}", analyze(buffer));
 

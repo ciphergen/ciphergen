@@ -64,7 +64,8 @@ fn generates_zero_bytes_as_base64() {
 
 #[test]
 fn generates_ten_thousand_character_password() {
-    let bytes = generate_password(true, true, 10000);
+    let character_set: Vec<char> = "!@*-_.0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".chars().collect();
+    let bytes = generate_password(&character_set, 10000);
     let string = from_utf8(&bytes).unwrap();
 
     assert_eq!(string.chars().count(), 10000)
@@ -72,7 +73,8 @@ fn generates_ten_thousand_character_password() {
 
 #[test]
 fn generates_empty_password() {
-    let bytes = generate_password(true, true, 0);
+    let character_set: Vec<char> = "!@*-_.0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".chars().collect();
+    let bytes = generate_password(&character_set, 0);
 
     assert_eq!(bytes.len(), 0)
 }

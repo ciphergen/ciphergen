@@ -2,7 +2,7 @@ mod generators;
 mod command;
 mod wordlist;
 
-use std::io::Write;
+use std::{io::Write, process::exit};
 
 use command::{arguments::parse, execute::execute};
 use log::{LevelFilter::{Warn, Info, Trace, Error}, error};
@@ -16,10 +16,11 @@ fn main() {
     else if arguments.verbosity.quiet { builder.filter_level(Error); }
     else { builder.filter_level(Warn); };
 
-    builder.format(|buffer, record| writeln!(buffer, "{}", record.args()));
+    builder.format(|buffer, record| writeln!(buffer, "{}: {}", record.level(), record.args()));
     builder.init();
 
     if let Some(error) = execute(arguments).err() {
         error!("Error: {}", error);
+        exit(-1);
     };
 }
