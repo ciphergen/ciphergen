@@ -64,7 +64,7 @@ pub enum GenerateCommands {
         /// The number of bytes to generate
         length: usize
     },
-    /// Generate a random alphanumeric password
+    /// Generate a random password with a configurable character set
     Password {
         #[arg(short = 'n', long = "numbers", help = "Don't include any digits", action = ArgAction::SetFalse)]
         numbers: bool,
