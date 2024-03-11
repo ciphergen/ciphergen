@@ -35,23 +35,19 @@ pub fn add_consonant(input: &mut Vec<char>, rng: &mut ThreadRng) {
     input.push(*value);
 }
 
-pub fn create_closed_syllable(rng: &mut ThreadRng) -> String {
-    let syllable = vec![
+pub fn create_closed_syllable(rng: &mut ThreadRng) -> Vec<char> {
+    vec![
         *choose_random_consonant(rng),
         *choose_random_vowel(rng),
         *choose_random_consonant(rng)
-    ];
-
-    syllable.iter().collect()
+    ]
 }
 
-pub fn create_open_syllable(rng: &mut ThreadRng) -> String {
-    let syllable = vec![
+pub fn create_open_syllable(rng: &mut ThreadRng) -> Vec<char> {
+    vec![
         *choose_random_consonant(rng),
         *choose_random_vowel(rng)
-    ];
-
-    syllable.iter().collect()
+    ]
 }
 
 pub enum SyllableType {
@@ -72,7 +68,7 @@ impl Distribution<SyllableType> for Standard {
 ///
 /// Usernames created in this fashion are guaranteed to be pronouncable,
 /// but are likely to be flagged as suspicious by automated tools and may not be aesthetically pleasing.
-pub fn generate_simple_username(length: usize) -> Vec<u8> {
+pub fn generate_simple_username(capitalize: bool, length: usize) -> Vec<u8> {
     if length == 0 { return Vec::<u8>::new(); }
 
     let mut output: Vec<char> = Vec::new();
@@ -97,6 +93,8 @@ pub fn generate_simple_username(length: usize) -> Vec<u8> {
         }
     }
 
+    if capitalize { output[0].make_ascii_uppercase(); }
+
     output.iter()
         .collect::<String>()
         .into_bytes()
@@ -106,19 +104,64 @@ pub fn generate_simple_username(length: usize) -> Vec<u8> {
 ///
 /// Syllabic usernames are less likely to be flagged as suspicious by automated tools,
 /// and may be more aesthetically pleasing.
-pub fn generate_complex_username(length: usize) -> Vec<u8> {
+pub fn generate_complex_username(capitalize: bool, length: usize) -> Vec<u8> {
     if length == 0 { return Vec::<u8>::new(); }
 
     let rng = &mut thread_rng();
-    let mut output = String::new();
+    let mut output = Vec::<char>::new();
 
     for _ in 0..length {
         // Generate a random syllable of a random type.
-        match random::<SyllableType>() {
-            SyllableType::CLOSED => output += &create_closed_syllable(rng),
-            SyllableType::OPEN => output += &create_open_syllable(rng)
-        }
+        let syllable = match random::<SyllableType>() {
+            SyllableType::CLOSED => create_closed_syllable(rng),
+            SyllableType::OPEN => create_open_syllable(rng)
+        };
+
+        output.extend(syllable);
     }
 
-    output.into_bytes()
+    if capitalize { output[0].make_ascii_uppercase(); }
+
+    output.iter()
+        .collect::<String>()
+        .into_bytes()
+}
+
+#[cfg(test)]
+mod tests {
+    use std::str::from_utf8;
+
+    use super::{generate_simple_username, generate_complex_username};
+
+    #[test]
+    fn generates_ten_thousand_character_simple_username() {
+        let bytes = generate_simple_username(false, 10000);
+        let string = from_utf8(&bytes).unwrap();
+
+        assert_eq!(string.chars().count(), 10000)
+    }
+
+    #[test]
+    fn generates_empty_simple_username() {
+        let bytes = generate_simple_username(false, 0);
+
+        assert_eq!(bytes.len(), 0)
+    }
+
+    #[test]
+    fn generates_ten_thousand_syllable_complex_username() {
+        let bytes = generate_complex_username(false, 10000);
+        let string = from_utf8(&bytes).unwrap();
+        let length = string.chars().count();
+        let range = 20000..=30000;
+
+        assert!(range.contains(&length), "expected a number in {:?}, but got {} instead", range, length);
+    }
+
+    #[test]
+    fn generates_empty_complex_username() {
+        let bytes = generate_complex_username(false, 0);
+
+        assert_eq!(bytes.len(), 0)
+    }
 }

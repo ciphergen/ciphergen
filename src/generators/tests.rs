@@ -3,7 +3,6 @@ use std::str::from_utf8;
 use super::binary::{generate_bytes, generate_hex, generate_base64};
 use super::password::generate_password;
 use super::passphrase::generate_passphrase;
-use super::username::{generate_simple_username, generate_complex_username};
 use super::digits::generate_digits;
 use super::number::generate_number;
 
@@ -111,38 +110,6 @@ fn empty_wordlist_panics() {
     let wordlist = Vec::<String>::new();
 
     generate_passphrase(&wordlist, &" ".to_string(), 1);
-}
-
-#[test]
-fn generates_ten_thousand_character_simple_username() {
-    let bytes = generate_simple_username(10000);
-    let string = from_utf8(&bytes).unwrap();
-
-    assert_eq!(string.chars().count(), 10000)
-}
-
-#[test]
-fn generates_empty_simple_username() {
-    let bytes = generate_simple_username(0);
-
-    assert_eq!(bytes.len(), 0)
-}
-
-#[test]
-fn generates_ten_thousand_syllable_complex_username() {
-    let bytes = generate_complex_username(10000);
-    let string = from_utf8(&bytes).unwrap();
-    let length = string.chars().count();
-    let range = 20000..=30000;
-
-    assert!(range.contains(&length), "expected a number in {:?}, but got {} instead", range, length);
-}
-
-#[test]
-fn generates_empty_complex_username() {
-    let bytes = generate_complex_username(0);
-
-    assert_eq!(bytes.len(), 0)
 }
 
 #[test]

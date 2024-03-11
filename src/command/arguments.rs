@@ -97,6 +97,9 @@ pub enum GenerateCommands {
     },
     /// Generate a random pronounceable username
     Username {
+        #[arg(short = 'C', long = "capitalize", help = "Make the first letter uppercase", global = true)]
+        capitalize: bool,
+
         #[command(subcommand)]
         command: UsernameCommands
     },

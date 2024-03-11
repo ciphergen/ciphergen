@@ -114,7 +114,7 @@ fn passphrase(sender: Sender<Vec<u8>>, path: &Option<String>, delimiter: &String
     });
 }
 
-fn username(sender: Sender<Vec<u8>>, command: UsernameCommands) {
+fn username(sender: Sender<Vec<u8>>, capitalize: bool, command: UsernameCommands) {
     match command {
         UsernameCommands::Simple { length, count } => {
             let max = count.unwrap_or(1);
@@ -122,7 +122,7 @@ fn username(sender: Sender<Vec<u8>>, command: UsernameCommands) {
             if max == 0 { return; }
 
             repeat_while_remaining(length, Some(max), |count, index| {
-                let buffer = generate_simple_username(count);
+                let buffer = generate_simple_username(capitalize, count);
 
                 sender.send(buffer).unwrap();
 
@@ -135,7 +135,7 @@ fn username(sender: Sender<Vec<u8>>, command: UsernameCommands) {
             if max == 0 { return; }
 
             repeat_while_remaining(length, Some(max), |count, index| {
-                let buffer = generate_complex_username(count);
+                let buffer = generate_complex_username(capitalize, count);
 
                 sender.send(buffer).unwrap();
 
@@ -185,8 +185,8 @@ pub fn generate(sender: Sender<Vec<u8>>, command: GenerateCommands) {
             => password(sender, numbers, symbols, length, count),
         GenerateCommands::Passphrase { path, delimiter, separator, length, count }
             => passphrase(sender, &path, &delimiter, &separator, length, count),
-        GenerateCommands::Username { command }
-            => username(sender, command),
+        GenerateCommands::Username { capitalize, command }
+            => username(sender, capitalize, command),
         GenerateCommands::Digits { length, count }
             => digits(sender, length, count),
         GenerateCommands::Number { minimum, maximum, count }
