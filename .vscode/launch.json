@@ -1,0 +1,42 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug Executable",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=ciphergen",
+                    "--package=ciphergen"
+                ],
+                "filter": {
+                    "name": "ciphergen",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug Tests",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bin=ciphergen",
+                    "--package=ciphergen"
+                ],
+                "filter": {
+                    "name": "ciphergen",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}
