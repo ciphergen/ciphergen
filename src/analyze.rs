@@ -22,8 +22,8 @@ impl fmt::Display for Report {
         let mut builder = Builder::new();
 
         builder.push_record(["Size", &self.size]);
-        builder.push_record(["Entropy Sh", &self.shannon_entropy.to_string()]);
-        builder.push_record(["Entropy So", &self.absolute_entropy.to_string()]);
+        builder.push_record(["Entropy (Sh)", &self.shannon_entropy.to_string()]);
+        builder.push_record(["Entropy (So)", &self.absolute_entropy.to_string()]);
         builder.push_record(["MD5", &self.md5]);
         builder.push_record(["SHA1", &self.sha1]);
         builder.push_record(["SHA2-256", &self.sha256]);
