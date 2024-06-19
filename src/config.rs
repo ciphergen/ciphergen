@@ -33,7 +33,7 @@ pub struct Verbosity {
 pub enum Commands {
     /// Generate a new secret key or username
     Generate {
-        /// The command to execute
+        /// The sub-command to execute
         #[command(subcommand)]
         command: GenerateCommands
     },
