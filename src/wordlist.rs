@@ -1,41 +1,41 @@
-use std::{fs::read_to_string, process::exit};
+use std::{fs::read_to_string, path::PathBuf};
 
-use log::{error, info};
-use rand::{seq::SliceRandom, thread_rng};
+use log::debug;
+use rand::{seq::SliceRandom, Rng};
 
-pub fn load_wordlist(path: &str, delimiter: &str) -> Result<Vec<String>, std::io::Error> {
+type VecStringResult = Result<Vec<String>, Box<dyn std::error::Error + Send + Sync>>;
+
+pub fn load_wordlist<R: Rng + Sized>(path: &PathBuf, delimiter: &str, rng: &mut R) -> VecStringResult {
     let input = read_to_string(path)?;
     let mut wordlist = input
         .split(delimiter)
         .map(|value| value.to_owned())
         .filter(|value| !value.is_empty())
-        .collect::<Vec<String>>();
+        .collect::<Vec<_>>();
+    let count = wordlist.len();
+
+    wordlist.shuffle(rng);
 
     if wordlist.is_empty() {
-        error!("The wordlist at {} contains no words", path);
-        exit(-1);
+        return Err(format!("The wordlist at {path:?} contains no words").into());
     }
 
-    let mut rng = thread_rng();
-
-    wordlist.shuffle(&mut rng);
-
-    info!("Loaded {} words from the wordlist at {}", wordlist.len(), path);
+    debug!("Loaded {count} words from the wordlist at {path:?}");
 
     Ok(wordlist)
 }
 
-pub fn load_default_wordlist() -> Vec<String> {
-    let mut rng = thread_rng();
+pub fn load_default_wordlist<R: Rng + Sized>(rng: &mut R) -> Vec<String> {
     let mut wordlist = include_str!("./wordlist.txt")
         .split('\n')
-        .map(|value| value.to_string())
+        .map(|value| value.to_owned())
         .filter(|value| !value.is_empty())
-        .collect::<Vec<String>>();
+        .collect::<Vec<_>>();
+    let count = wordlist.len();
 
-    wordlist.shuffle(&mut rng);
+    wordlist.shuffle(rng);
 
-    info!("Loaded {} words from the default wordlist", wordlist.len());
+    debug!("Loaded {count} words from the default wordlist");
 
     wordlist
 }

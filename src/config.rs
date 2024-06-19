@@ -1,6 +1,9 @@
 use std::path::PathBuf;
 
 use clap::{Parser, Subcommand, Args, ArgAction};
+use log::LevelFilter;
+
+type UnitResult = Result<(), Box<dyn std::error::Error + Send + Sync>>;
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None, arg_required_else_help = true)]
@@ -81,7 +84,7 @@ pub enum GenerateCommands {
     /// Generate a passphrase composed of words chosen at random from a wordlist
     Passphrase {
         #[arg(short = 'p', long = "path", help = "The wordlist file to read into memory")]
-        path: Option<String>,
+        path: Option<PathBuf>,
 
         #[arg(short = 'D', long = "delimiter", help = "The string used to separate words from each other in the wordlist", default_value = "\n")]
         delimiter: String,
@@ -144,6 +147,30 @@ pub enum UsernameCommands {
     }
 }
 
+impl Verbosity {
+    fn to_filter(&self) -> LevelFilter {
+        if self.debug { LevelFilter::Trace }
+        else if self.verbose { LevelFilter::Debug }
+        else if self.quiet { LevelFilter::Warn }
+        else { LevelFilter::Info }
+    }
+}
+
 pub fn parse() -> Arguments {
     Arguments::parse()
+}
+
+pub fn setup_logging(verbosity: &Verbosity) -> UnitResult {
+    let filter = verbosity.to_filter();
+
+    env_logger::builder()
+        .filter_level(filter)
+        .format_level(true)
+        .format_target(false)
+        .format_module_path(false)
+        .format_timestamp_secs()
+        .parse_default_env()
+        .try_init()?;
+
+    Ok(())
 }

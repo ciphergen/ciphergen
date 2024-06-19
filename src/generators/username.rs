@@ -15,27 +15,27 @@ const CONSONANTS: [char; 20] = [
     't', 'v', 'w', 'x', 'z'
 ];
 
-pub fn choose_random_vowel(rng: &mut ThreadRng) -> &char {
+fn choose_random_vowel(rng: &mut ThreadRng) -> &char {
     VOWELS.choose(rng).unwrap()
 }
 
-pub fn choose_random_consonant(rng: &mut ThreadRng) -> &char {
+fn choose_random_consonant(rng: &mut ThreadRng) -> &char {
     CONSONANTS.choose(rng).unwrap()
 }
 
-pub fn add_vowel(input: &mut Vec<char>, rng: &mut ThreadRng) {
+fn add_vowel(input: &mut Vec<char>, rng: &mut ThreadRng) {
     let value = choose_random_vowel(rng);
 
     input.push(*value);
 }
 
-pub fn add_consonant(input: &mut Vec<char>, rng: &mut ThreadRng) {
+fn add_consonant(input: &mut Vec<char>, rng: &mut ThreadRng) {
     let value = choose_random_consonant(rng);
 
     input.push(*value);
 }
 
-pub fn create_closed_syllable(rng: &mut ThreadRng) -> Vec<char> {
+fn create_closed_syllable(rng: &mut ThreadRng) -> Vec<char> {
     vec![
         *choose_random_consonant(rng),
         *choose_random_vowel(rng),
@@ -43,14 +43,14 @@ pub fn create_closed_syllable(rng: &mut ThreadRng) -> Vec<char> {
     ]
 }
 
-pub fn create_open_syllable(rng: &mut ThreadRng) -> Vec<char> {
+fn create_open_syllable(rng: &mut ThreadRng) -> Vec<char> {
     vec![
         *choose_random_consonant(rng),
         *choose_random_vowel(rng)
     ]
 }
 
-pub enum SyllableType {
+enum SyllableType {
     CLOSED,
     OPEN
 }

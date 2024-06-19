@@ -9,7 +9,8 @@ use tabled::builder::Builder;
 
 struct Report {
     size: String,
-    entropy: String,
+    shannon_entropy: f64,
+    absolute_entropy: f64,
     md5: String,
     sha1: String,
     sha256: String,
@@ -21,11 +22,12 @@ impl fmt::Display for Report {
         let mut builder = Builder::new();
 
         builder.push_record(["Size", &self.size]);
-        builder.push_record(["Entropy", &self.entropy]);
+        builder.push_record(["Entropy Sh", &self.shannon_entropy.to_string()]);
+        builder.push_record(["Entropy So", &self.absolute_entropy.to_string()]);
         builder.push_record(["MD5", &self.md5]);
         builder.push_record(["SHA1", &self.sha1]);
-        builder.push_record(["SHA256", &self.sha256]);
-        builder.push_record(["SHA512", &self.sha512]);
+        builder.push_record(["SHA2-256", &self.sha256]);
+        builder.push_record(["SHA2-512", &self.sha512]);
 
         write!(formatter, "{}", builder.build())
     }
@@ -43,12 +45,10 @@ pub fn analyze(buffer: Vec<u8>) -> String {
     sha256.update(&buffer);
     sha512.update(&buffer);
 
-    let shannon_entropy = shannon_entropy(&buffer);
-    let absolute_entropy = normalized_absolute_entropy(&buffer);
-
     let report = Report {
         size: ByteSize::b(length as u64).to_string(),
-        entropy: format!("{} (Shannon) | {} (Absolute)", shannon_entropy, absolute_entropy),
+        shannon_entropy: shannon_entropy(&buffer),
+        absolute_entropy: normalized_absolute_entropy(&buffer),
         md5: encode(md5.finalize()),
         sha1: encode(sha1.finalize()),
         sha256: encode(sha256.finalize()),
@@ -92,7 +92,7 @@ fn normalized_absolute_entropy(buffer: &[u8]) -> f64 {
 
 #[cfg(test)]
 mod tests {
-    use super::{shannon_entropy, normalized_absolute_entropy};
+    use super::*;
 
     #[test]
     fn zero_bytes_has_zero_shannon_entropy() {
