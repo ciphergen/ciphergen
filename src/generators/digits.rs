@@ -12,3 +12,26 @@ pub fn generate_digits(length: usize) -> Vec<u8> {
         .collect::<String>()
         .into_bytes()
 }
+
+#[cfg(test)]
+mod tests {
+    use std::str::from_utf8;
+
+    use super::*;
+
+    #[test]
+    fn generates_ten_thousand_digits() {
+        let bytes = generate_digits(10000);
+        let string = from_utf8(&bytes).unwrap();
+
+        assert_eq!(string.chars().count(), 10000)
+    }
+
+
+    #[test]
+    fn generates_zero_digits() {
+        let bytes = generate_digits(0);
+
+        assert_eq!(bytes.len(), 0)
+    }
+}

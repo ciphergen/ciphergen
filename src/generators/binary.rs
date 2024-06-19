@@ -31,3 +31,54 @@ pub fn generate_base64(url_safe: bool, length: usize) -> Vec<u8> {
     if url_safe { URL_SAFE.encode(bytes).into_bytes() }
     else { STANDARD.encode(bytes).into_bytes() }
 }
+
+#[cfg(test)]
+mod tests {
+    use std::str::from_utf8;
+
+    use super::*;
+
+    #[test]
+    fn generates_one_kilobyte() {
+        let bytes = generate_bytes(1024);
+
+        assert_eq!(bytes.len(), 1024)
+    }
+
+    #[test]
+    fn generates_zero_bytes() {
+        let bytes = generate_bytes(0);
+
+        assert_eq!(bytes.len(), 0)
+    }
+
+    #[test]
+    fn generates_one_kilobyte_as_hex() {
+        let bytes = generate_hex(false, 1024);
+        let string = from_utf8(&bytes).unwrap();
+
+        assert_eq!(string.chars().count(), 2048)
+    }
+
+    #[test]
+    fn generates_zero_bytes_as_hex() {
+        let bytes = generate_hex(false, 0);
+
+        assert_eq!(bytes.len(), 0)
+    }
+
+    #[test]
+    fn generates_one_kilobyte_as_base64() {
+        let bytes = generate_base64(false, 1024);
+        let string = from_utf8(&bytes).unwrap();
+
+        assert_eq!(string.chars().count(), 1368)
+    }
+
+    #[test]
+    fn generates_zero_bytes_as_base64() {
+        let bytes = generate_base64(false, 0);
+
+        assert_eq!(bytes.len(), 0)
+    }
+}
