@@ -47,9 +47,9 @@ jobs:
           TAG: ${{ github.REF_NAME }}
         run: |
           gh release create $TAG \
-            "ciphergen-linux-x86_64.zip#Linux x86_64" \
-            "ciphergen-windows-x86_64.zip#Windows x86_64" \
+            "ciphergen-linux-x86_64.zip#Linux-x86_64.zip" \
+            "ciphergen-windows-x86_64.zip#Windows-x86_64.zip" \
             --title "${TAG#v}" \
-            --notes $(git tag -l --format '%(contents:subject)%0a%0a%(contents:body)' $TAG | echo) \
+            --notes "$(git tag -l --format '%(contents:subject)%0a%0a%(contents:body)' $TAG | echo)" \
             --verify-tag \
             --latest
