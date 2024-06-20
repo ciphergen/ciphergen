@@ -41,6 +41,14 @@ pub enum Commands {
     Analyze {
         /// A path to a file on a filesystem, or leave empty to read from STDIN
         input: Option<PathBuf>
+    },
+    /// Create a visualization of an arbitary piece of data.
+    Visualize {
+        #[arg(help = "A path to a file on a filesystem, or leave empty to read from STDIN")]
+        input: Option<PathBuf>,
+
+        #[arg(short = 'o', long = "output", help = "A path on a filesystem where data should be written, or leave empty to write to STDOUT")]
+        output: Option<PathBuf>
     }
 }
 
@@ -61,7 +69,7 @@ pub enum GenerateCommands {
     },
     /// Generate random bytes and encode them as a Base64 string
     Base64 {
-        #[arg(short = 's', long = "url-safe", help = "Use a URL-safe alphabet")]
+        #[arg(short = 'u', long = "url-safe", help = "Use a URL-safe alphabet")]
         url_safe: bool,
 
         /// The number of bytes to generate
@@ -69,10 +77,10 @@ pub enum GenerateCommands {
     },
     /// Generate a random password with a configurable character set
     Password {
-        #[arg(short = 'n', long = "numbers", help = "Don't include any digits", action = ArgAction::SetFalse)]
+        #[arg(short = 'D', long = "no-digits", help = "Don't include any digits", action = ArgAction::SetFalse)]
         numbers: bool,
 
-        #[arg(short = 's', long = "symbols", help = "Don't include any symbols", action = ArgAction::SetFalse)]
+        #[arg(short = 'S', long = "no-symbols", help = "Don't include any symbols", action = ArgAction::SetFalse)]
         symbols: bool,
 
         /// The number of characters to generate

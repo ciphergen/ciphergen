@@ -1,4 +1,4 @@
-use std::fs::read;
+use std::fs::{read, File};
 use std::io::{stdin, stdout, Read, Write};
 use std::path::PathBuf;
 use std::sync::mpsc::channel;
@@ -9,11 +9,13 @@ mod config;
 mod analyze;
 mod generate;
 mod generators;
+mod visualize;
 
 use config::{parse, setup_logging, Commands, GenerateCommands, UsernameCommands};
 use analyze::analyze;
 use generate::{create_base64, create_bytes, create_digits, create_hex, create_number, create_passphrase, create_password, create_username, UsernameKind};
 use rand::{thread_rng, prelude::SliceRandom};
+use visualize::visualize;
 use wordlist::{load_default_wordlist, load_wordlist};
 
 type UnitResult = Result<(), Box<dyn std::error::Error + Send + Sync>>;
@@ -117,6 +119,24 @@ fn main() -> UnitResult {
             let report = analyze(buffer);
 
             println!("{report}");
+        }
+        Commands::Visualize { input, output } => {
+            let buffer = read_in(input)?;
+
+            if let Some(path) = output {
+                let file = File::options()
+                    .create(true)
+                    .write(true)
+                    .truncate(true)
+                    .open(path)?;
+
+                visualize(file, &buffer)?;
+            }
+            else {
+                let stdout = stdout();
+
+                visualize(stdout, &buffer)?;
+            };
         }
     }
 
