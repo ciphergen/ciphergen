@@ -172,49 +172,49 @@ ciphergen visualize example/audio.wav -o audio.png
 Here are some sample images to demonstrate the visualization function:
 
 ```txt
-Algorithm: SHA256
-Hash:      D74EB5AAAB056842925FC90719EE6495EBF2CCFBEDBA90C09D9ABA4E8DB014A1
-Path:      image/audio.png
+Algorithm: SHA2-256
+Hash:      D2D489CF9C2FB7108A8FEE571CA50B60974A8333EC9850620CD9BAE8D2B380F0
+Path:      example/audio.wav
 ```
 
 ![audio.wav](image/audio.png)
 
 ```txt
-Algorithm: SHA256
-Hash:      742B0A7B9D95B996475C02FCC56E82C4551D02FA341B41B3CD031DF2AA81C84C
-Path:      image/columns.png
+Algorithm: SHA2-256
+Hash:      088045B924DD7ED92B6798832E0F8A748A31E0003D63831C6A947619DDADA48D
+Path:      example/columns
 ```
 
 ![columns](image/columns.png)
 
 ```txt
-Algorithm: SHA256
-Hash:      A661F23662E14A1115D103BC0D9D302D1D797040B244B4C6D4195392D241A9E3
-Path:      image/ones.png
+Algorithm: SHA2-256
+Hash:      3B874D3BA46C638FC3094F8E92FB744CA974893873F8885F54E23760F9B6311B
+Path:      example/ones
 ```
 
 ![ones](image/ones.png)
 
 ```txt
-Algorithm: SHA256
-Hash:      BF7D01D473C3B7420B72954F987E164012251102652EC63552214076CFD54659
-Path:      image/random.png
+Algorithm: SHA2-256
+Hash:      7F69648E747FAD91D5DD08F09CF504E4256F579614A625CF90AED838A51F68CC
+Path:      example/random
 ```
 
 ![random](image/random.png)
 
 ```txt
-Algorithm: SHA256
-Hash:      E0A452FACE6C762D33ECDC7ADC704E6FCB31CC495AAF78B9F870DEE05E70C549
-Path:      image/rows.png
+Algorithm: SHA2-256
+Hash:      8ED05C8FFD55327D83A40C8B3533C13602E78C99C7DFDAB4EBEF866C9E5FD536
+Path:      example/rows
 ```
 
 ![rows](image/rows.png)
 
 ```txt
-Algorithm: SHA256
-Hash:      A938F758B2388AF47A30D69209D5946C403CEACCF09177DB910EC5927110C94B
-Path:      image/zeros.png
+Algorithm: SHA2-256
+Hash:      8A39D2ABD3999AB73C34DB2476849CDDF303CE389B35826850F9A700589B4A90
+Path:      example/zeros
 ```
 
 ![zeros](image/zeros.png)
