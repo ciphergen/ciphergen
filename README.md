@@ -219,6 +219,17 @@ Path:      example/zeros
 
 ![zeros](image/zeros.png)
 
+# Docker
+
+A Dockerfile is included in this repository which, when built, provides a copy of CipherGen that can be run in a containerized environment.
+
+## Usage
+
+```bash
+docker build -t ciphergen/ciphergen:latest .
+docker run ciphergen/ciphergen:latest --version
+```
+
 # Contributing
 
 Contributions are welcome! Feel free to open an issue or pull request.
