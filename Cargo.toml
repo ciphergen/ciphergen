@@ -1,6 +1,6 @@
 [package]
 name = "ciphergen"
-version = "1.2.0"
+version = "1.3.0"
 authors = ["Anastasiya Polina Soyka <apsoyka@protonmail.com>"]
 edition = "2021"
 description = "CipherGen is a native Rust program that provides a command-line interface (CLI) for generating cryptographically-secure secret keys, such as passwords and passphrases."
