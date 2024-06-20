@@ -1,7 +1,13 @@
 [package]
 name = "ciphergen"
 version = "1.2.0"
+authors = ["Anastasiya Polina Soyka <apsoyka@protonmail.com>"]
 edition = "2021"
+description = "CipherGen is a native Rust program that provides a command-line interface (CLI) for generating cryptographically-secure secret keys, such as passwords and passphrases."
+readme = "README.md"
+repository = "https://github.com/ciphergen/ciphergen"
+license = "MIT"
+keywords = ["cryptography", "entropy", "password"]
 
 [dependencies]
 base64 = "0.21.2"
