@@ -2,8 +2,6 @@ FROM public.ecr.aws/ubuntu/ubuntu:24.04 as BUILDER
 
 ARG DEBIAN_FRONTEND=noninteractive
 
-LABEL maintainer="apsoyka@protonmail.com"
-
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
     apt update && \
@@ -19,6 +17,10 @@ COPY . .
 RUN /root/.cargo/bin/cargo build --release && tree -a .
 
 FROM public.ecr.aws/ubuntu/ubuntu:24.04
+
+ARG DEBIAN_FRONTEND=noninteractive
+
+LABEL maintainer="apsoyka@protonmail.com"
 
 RUN printf 'CREATE_MAIL_SPOOL=no' >> /etc/default/useradd && \
     mkdir -p /home/ciphergen /home/scripts && \
