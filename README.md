@@ -125,6 +125,8 @@ Note that, in the case of complex usernames, the first numeric argument refers t
 
 ## Analysis
 
+CipherGen supports a binary analysis feature which will provide certain relevant data about an arbitrary blob of data.
+
 To read and analyze a file on the local filesystem, pass the path to the file as a positional argument to the `analyze` command. To read and analyze bytes from STDIN instead, leave the positional argument blank.
 
 For example, to analyze the following string:
@@ -153,7 +155,69 @@ Which will produce the following output:
 +--------------+----------------------------------------------------------------------------------------------------------------------------------+
 ```
 
+# Visualization
 
+CipherGen can create visualizations of arbitrary binary data.
+
+To create a visualization of a file on the local filesystem, pass the path to the file as a positional argument to the `visualize` command. To create a visualization from STDIN instead, leave the positional argument blank.
+
+For example, to create a visualization of the included `audio.wav` file and save the resulting PNG image to `audio.png`:
+
+```bash
+ciphergen visualize example/audio.wav -o audio.png
+```
+
+## Samples
+
+Here are some sample images to demonstrate the visualization function:
+
+```txt
+Algorithm: SHA256
+Hash:      D74EB5AAAB056842925FC90719EE6495EBF2CCFBEDBA90C09D9ABA4E8DB014A1
+Path:      image/audio.png
+```
+
+![audio.wav](image/audio.png)
+
+```txt
+Algorithm: SHA256
+Hash:      742B0A7B9D95B996475C02FCC56E82C4551D02FA341B41B3CD031DF2AA81C84C
+Path:      image/columns.png
+```
+
+![columns](image/columns.png)
+
+```txt
+Algorithm: SHA256
+Hash:      A661F23662E14A1115D103BC0D9D302D1D797040B244B4C6D4195392D241A9E3
+Path:      image/ones.png
+```
+
+![ones](image/ones.png)
+
+```txt
+Algorithm: SHA256
+Hash:      BF7D01D473C3B7420B72954F987E164012251102652EC63552214076CFD54659
+Path:      image/random.png
+```
+
+![random](image/random.png)
+
+```txt
+Algorithm: SHA256
+Hash:      E0A452FACE6C762D33ECDC7ADC704E6FCB31CC495AAF78B9F870DEE05E70C549
+Path:      image/rows.png
+```
+
+![rows](image/rows.png)
+
+```txt
+Algorithm: SHA256
+Hash:      A938F758B2388AF47A30D69209D5946C403CEACCF09177DB910EC5927110C94B
+Path:      image/zeros.png
+```
+
+![zeros](image/zeros.png)
 
 # Contributing
 
