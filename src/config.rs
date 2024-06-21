@@ -3,7 +3,8 @@ use std::path::PathBuf;
 use clap::{Parser, Subcommand, Args, ArgAction};
 use log::LevelFilter;
 
-type UnitResult = Result<(), Box<dyn std::error::Error + Send + Sync>>;
+type BoxedError<'a> = Box<dyn std::error::Error + Send + Sync + 'a>;
+type UnitResult<'a> = Result<(), BoxedError<'a>>;
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None, arg_required_else_help = true)]
@@ -168,7 +169,7 @@ pub fn parse() -> Arguments {
     Arguments::parse()
 }
 
-pub fn setup_logging(verbosity: &Verbosity) -> UnitResult {
+pub fn setup_logging<'a>(verbosity: &Verbosity) -> UnitResult<'a> {
     let filter = verbosity.to_filter();
 
     env_logger::builder()

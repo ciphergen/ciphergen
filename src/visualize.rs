@@ -4,7 +4,8 @@ use bytesize::ByteSize;
 use log::debug;
 use png::{BitDepth, ColorType, Compression, Encoder};
 
-type UnitResult = Result<(), Box<dyn std::error::Error + Send + Sync>>;
+type BoxedError<'a> = Box<dyn std::error::Error + Send + Sync + 'a>;
+type UnitResult<'a> = Result<(), BoxedError<'a>>;
 
 /// Render the input data as a bitmap, substituting zeros for missing bytes.
 fn draw_bitmap(data: &[u8], width: usize, height: usize) -> Vec<u8> {
@@ -14,7 +15,7 @@ fn draw_bitmap(data: &[u8], width: usize, height: usize) -> Vec<u8> {
     for column in 0..height {
         for row in 0..width {
             let position = row + width * column;
-            let pixel = if position < size { data[position] } else { 0 };
+            let pixel = if position < size { data[position] } else { 255 };
 
             bitmap[position] = pixel;
         }
@@ -23,7 +24,7 @@ fn draw_bitmap(data: &[u8], width: usize, height: usize) -> Vec<u8> {
     bitmap
 }
 
-pub fn visualize<W: Write>(writer: W, data: &[u8]) -> UnitResult {
+pub fn visualize<'a, W: Write>(writer: W, data: &[u8]) -> UnitResult<'a> {
     let size = data.len() as u64;
     let resolution = (size as f64).sqrt().ceil();
     let (width, height) = (resolution as u32, resolution as u32);

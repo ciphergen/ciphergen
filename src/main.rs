@@ -10,6 +10,7 @@ mod analyze;
 mod generate;
 mod generators;
 mod visualize;
+mod panic;
 
 use config::{parse, setup_logging, Commands, GenerateCommands, UsernameCommands};
 use analyze::analyze;
@@ -17,6 +18,7 @@ use generate::{create_base64, create_bytes, create_digits, create_hex, create_nu
 use rand::{thread_rng, prelude::SliceRandom};
 use visualize::visualize;
 use wordlist::{load_default_wordlist, load_wordlist};
+use panic::setup_panic;
 
 type UnitResult = Result<(), Box<dyn std::error::Error + Send + Sync>>;
 type VecByteResult = Result<Vec<u8>, Box<dyn std::error::Error + Send + Sync>>;
@@ -59,6 +61,8 @@ fn load_character_set(numbers: bool, symbols: bool) -> Vec<char> {
 
 fn main() -> UnitResult {
     let arguments = parse();
+
+    setup_panic();
 
     setup_logging(&arguments.verbosity)?;
 

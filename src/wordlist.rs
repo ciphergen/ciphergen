@@ -3,9 +3,10 @@ use std::{fs::read_to_string, path::PathBuf};
 use log::debug;
 use rand::{seq::SliceRandom, Rng};
 
-type VecStringResult = Result<Vec<String>, Box<dyn std::error::Error + Send + Sync>>;
+type BoxedError<'a> = Box<dyn std::error::Error + Send + Sync + 'a>;
+type StringVecResult<'a> = Result<Vec<String>, BoxedError<'a>>;
 
-pub fn load_wordlist<R: Rng + Sized>(path: &PathBuf, delimiter: &str, rng: &mut R) -> VecStringResult {
+pub fn load_wordlist<'a, R: Rng + Sized>(path: &PathBuf, delimiter: &str, rng: &mut R) -> StringVecResult<'a> {
     let input = read_to_string(path)?;
     let mut wordlist = input
         .split(delimiter)
