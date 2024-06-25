@@ -7,8 +7,7 @@ type BoxedError<'a> = Box<dyn std::error::Error + Send + Sync + 'a>;
 type UnitResult<'a> = Result<(), BoxedError<'a>>;
 
 #[derive(Parser)]
-#[command(author, version, about, long_about = None, arg_required_else_help = true)]
-#[command(propagate_version = true)]
+#[command(author, version, about, long_about = None, arg_required_else_help = true, propagate_version = true)]
 pub struct Arguments {
     #[command(subcommand)]
     pub command: Commands,
