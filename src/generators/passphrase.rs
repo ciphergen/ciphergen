@@ -19,6 +19,8 @@ pub fn generate_passphrase(wordlist: &[String], separator: &str, length: usize) 
 mod tests {
     use std::str::from_utf8;
 
+    use zstd::bulk::decompress;
+
     use super::*;
 
     fn word_count(buffer: &Vec<u8>) -> usize {
@@ -29,7 +31,15 @@ mod tests {
     }
 
     fn load_test_wordlist() -> Vec<String> {
-        include_str!("../wordlist.txt").split('\n').map(|value| value.to_string()).collect()
+        let buffer = include_bytes!("../wordlist.txt.zst");
+        let bytes = decompress(buffer, 62144).unwrap();
+
+        from_utf8(&bytes)
+            .unwrap()
+            .split('\n')
+            .map(|value| value.to_owned())
+            .filter(|value| !value.is_empty())
+            .collect()
     }
 
     #[test]
