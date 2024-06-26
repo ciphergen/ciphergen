@@ -132,7 +132,27 @@ pub enum GenerateCommands {
 
         /// How many numbers to generate
         count: Option<usize>
-    }
+    },
+    /// Generate a random word using a Markov model
+    Markov {
+        #[arg(short = 'c', long = "capitalize", help = "Make the first letter uppercase")]
+        capitalize: bool,
+
+        #[arg(short = 'i', long = "input", help = "A path to a file containing a corpus to use")]
+        path: Option<PathBuf>,
+
+        #[arg(short = 'o', long = "order", help = "The model ordering to use", default_value = "3")]
+        order: usize,
+
+        #[arg(short = 'p', long = "prior", help = "The model ordering to use", default_value = "0.0")]
+        prior: f64,
+
+        #[arg(short = 'b', long = "backoff", help = "Use Katz back-off models")]
+        backoff: bool,
+
+        /// How many simple usernames to generate
+        count: Option<usize>
+    },
 }
 
 #[derive(Subcommand)]

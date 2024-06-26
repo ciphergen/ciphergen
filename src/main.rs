@@ -1,4 +1,4 @@
-use std::fs::{read, File};
+use std::fs::{create_dir_all, read, File};
 use std::io::{stdin, stdout, Read, Write};
 use std::path::PathBuf;
 use std::sync::mpsc::channel;
@@ -11,20 +11,33 @@ mod generate;
 mod generators;
 mod visualize;
 mod panic;
+mod markov;
 
+use bincode::{deserialize, serialize};
 use config::{parse, setup_logging, Commands, GenerateCommands, UsernameCommands};
 use analyze::analyze;
-use generate::{create_base64, create_bytes, create_digits, create_hex, create_number, create_passphrase, create_password, create_username, UsernameKind};
+use directories::ProjectDirs;
+use generate::{create_base64, create_bytes, create_digits, create_hex, create_markov, create_number, create_passphrase, create_password, create_username, UsernameKind};
+use log::{debug, trace, warn};
+use markov::{load_corpus, load_default_corpus, Generator, MarkovGenerator};
+use rand::Rng;
 use rand::{thread_rng, prelude::SliceRandom};
 use visualize::visualize;
 use wordlist::{load_default_wordlist, load_wordlist};
 use panic::setup_panic;
 
-type UnitResult = Result<(), Box<dyn std::error::Error + Send + Sync>>;
-type VecByteResult = Result<Vec<u8>, Box<dyn std::error::Error + Send + Sync>>;
+type BoxedError<'a> = Box<dyn std::error::Error + Send + Sync + 'a>;
+type UnitResult<'a> = Result<(), BoxedError<'a>>;
+type VecByteResult<'a> = Result<Vec<u8>, BoxedError<'a>>;
+type VecStringResult<'a> = Result<Vec<String>, BoxedError<'a>>;
+type GeneratorResult<'a> = Result<Generator, BoxedError<'a>>;
+
+const QUALIFIER: &str = "io.github";
+const ORGANIZATION: &str = "ciphergen";
+const APPLICATION: &str = "ciphergen";
 
 /// Read data from a file or STDIN
-fn read_in(path: Option<PathBuf>) -> VecByteResult {
+fn read_in<'a>(path: Option<PathBuf>) -> VecByteResult<'a> {
     let mut buffer = Vec::<u8>::new();
 
     match path {
@@ -42,7 +55,7 @@ fn read_in(path: Option<PathBuf>) -> VecByteResult {
 }
 
 /// Loads the correct character set based on the available symbols
-fn load_character_set(numbers: bool, symbols: bool) -> Vec<char> {
+fn get_character_set(numbers: bool, symbols: bool) -> Vec<char> {
     let flags = (numbers, symbols);
 
     let mut character_set: Vec<char> = match flags {
@@ -59,7 +72,84 @@ fn load_character_set(numbers: bool, symbols: bool) -> Vec<char> {
     character_set
 }
 
-fn main() -> UnitResult {
+fn get_wordlist<'a, R: Rng + Sized>(path: Option<PathBuf>, delimiter: &str, rng: &mut R) -> VecStringResult<'a> {
+    let wordlist = match path {
+        Some(path) => load_wordlist(&path, &delimiter, rng)?,
+        None => load_default_wordlist(rng),
+    };
+
+    Ok(wordlist)
+}
+
+fn get_corpus<'a, R: Rng + Sized>(path: Option<PathBuf>, rng: &mut R) -> VecStringResult<'a> {
+    let corpus = match path {
+        Some(path) => load_corpus(&path, rng)?,
+        None => load_default_corpus(rng)
+    };
+
+    Ok(corpus)
+}
+
+fn read_file<'a>(path: PathBuf) -> GeneratorResult<'a> {
+    let mut file = File::options()
+        .read(true)
+        .open(path.clone())?;
+
+    let mut buffer = Vec::<u8>::new();
+
+    file.read_to_end(&mut buffer)?;
+
+    let generator = deserialize::<Generator>(&buffer)?;
+
+    Ok(generator)
+}
+
+fn build_generator<'a>(path: &PathBuf, corpus: &[String], order: usize, prior: f64, backoff: bool) -> GeneratorResult<'a> {
+    warn!("Building model; this may take awhile...");
+
+    let generator = Generator::new(&corpus, order, prior, backoff);
+    let buffer = serialize(&generator)?;
+    let mut file = File::options()
+        .create(true)
+        .write(true)
+        .truncate(true)
+        .open(path.clone())?;
+
+    file.write_all(&buffer)?;
+
+    debug!("Wrote cached model file to {path:#?}");
+
+    Ok(generator)
+}
+
+fn get_generator<'a>(corpus_path: Option<PathBuf>, order: usize, prior: f64, backoff: bool) -> GeneratorResult<'a> {
+    let project_dir = ProjectDirs::from(QUALIFIER, ORGANIZATION, APPLICATION)
+        .ok_or("Failed to find cache path on filesystem")?;
+    let cache_dir = project_dir.cache_dir();
+
+    create_dir_all(cache_dir)?;
+
+    let cache_path = &cache_dir.join("model.bin");
+    let generator = match read_file(cache_path.clone()) {
+        Ok(generator) => {
+            debug!("Using cached model file at {cache_path:#?}");
+
+            generator
+        },
+        Err(error) => {
+            trace!("{error:#}");
+
+            let mut rng = thread_rng();
+            let corpus = get_corpus(corpus_path, &mut rng)?;
+
+            build_generator(cache_path, &corpus, order, prior, backoff)?
+        }
+    };
+
+    Ok(generator)
+}
+
+fn main() -> UnitResult<'static> {
     let arguments = parse();
 
     setup_panic();
@@ -79,18 +169,14 @@ fn main() -> UnitResult {
                     => spawn(move || create_base64(sender, url_safe, length)),
                 GenerateCommands::Password { numbers, symbols, length, count }
                     => {
-                        let character_set = load_character_set(numbers, symbols);
+                        let character_set = get_character_set(numbers, symbols);
 
                         spawn(move || create_password(sender, &character_set, length, count))
                     },
                 GenerateCommands::Passphrase { path, delimiter, separator, length, count }
                     => {
                         let mut rng = thread_rng();
-
-                        let wordlist = match path {
-                            Some(path) => load_wordlist(&path, &delimiter, &mut rng)?,
-                            None => load_default_wordlist(&mut rng),
-                        };
+                        let wordlist = get_wordlist(path, &delimiter, &mut rng)?;
 
                         spawn(move || create_passphrase(sender, &wordlist, &separator, length, count))
                     },
@@ -104,7 +190,13 @@ fn main() -> UnitResult {
                 GenerateCommands::Digits { length, count }
                     => spawn(move || create_digits(sender, length, count)),
                 GenerateCommands::Number { minimum, maximum, count }
-                    => spawn(move || create_number(sender, minimum, maximum, count))
+                    => spawn(move || create_number(sender, minimum, maximum, count)),
+                GenerateCommands::Markov { capitalize, path, order, prior, backoff, count }
+                    => {
+                        let generator = get_generator(path, order, prior, backoff)?;
+
+                        spawn(move || create_markov(sender, capitalize, generator, count))
+                    }
             };
 
             let mut stdout = stdout();

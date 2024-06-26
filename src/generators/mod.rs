@@ -4,6 +4,7 @@ pub mod passphrase;
 pub mod username;
 pub mod digits;
 pub mod number;
+pub mod markov;
 
 pub use binary::{generate_bytes, generate_hex, generate_base64};
 pub use password::generate_password;
@@ -11,3 +12,4 @@ pub use passphrase::generate_passphrase;
 pub use username::{generate_simple_username, generate_complex_username};
 pub use digits::generate_digits;
 pub use number::generate_number;
+pub use markov::generate_markov;

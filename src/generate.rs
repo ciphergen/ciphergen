@@ -1,8 +1,9 @@
 use std::sync::{atomic::{AtomicUsize, Ordering}, mpsc::Sender};
 
+use rand::thread_rng;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 
-use crate::generators::*;
+use crate::{generators::*, markov::Generator};
 
 const LINE_FEED: u8 = b'\n';
 
@@ -17,7 +18,7 @@ fn create_serial(sender: Sender<Vec<u8>>, closure: impl FnOnce() -> Vec<u8>) {
     sender.send(buffer).unwrap();
 }
 
-fn create_parallel(sender: Sender<Vec<u8>>, count: Option<usize>, closure: impl FnOnce() -> Vec<u8> + Send + Sync + Copy) {
+fn create_parallel(sender: Sender<Vec<u8>>, count: Option<usize>, closure: impl Fn() -> Vec<u8> + Send + Sync) {
     let max = count.unwrap_or(1);
     let range = 0..max;
     let counter = AtomicUsize::new(0);
@@ -64,4 +65,8 @@ pub fn create_digits(sender: Sender<Vec<u8>>, length: usize, count: Option<usize
 
 pub fn create_number(sender: Sender<Vec<u8>>, minimum: usize, maximum: usize, count: Option<usize>) {
     create_parallel(sender, count, || generate_number(minimum, maximum));
+}
+
+pub fn create_markov(sender: Sender<Vec<u8>>, capitalize: bool, generator: Generator, count: Option<usize>) {
+    create_parallel(sender, count, || generate_markov(generator.clone(), capitalize, &mut thread_rng()));
 }
