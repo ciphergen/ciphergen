@@ -1,6 +1,5 @@
 use std::collections::HashMap;
 
-use log::trace;
 use rand::Rng;
 use serde::{Deserialize, Serialize};
 use sha2::{Sha512, Digest};
@@ -40,10 +39,6 @@ impl MarkovModel for Model {
 
         model.train();
         model.build_chains();
-
-        let report = (model.order, model.prior, model.alphabet.clone(), model.observations.clone());
-
-        trace!("{:#?}", report);
 
         model
     }

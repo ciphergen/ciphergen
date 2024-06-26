@@ -150,6 +150,9 @@ pub enum GenerateCommands {
         #[arg(short = 'b', long = "backoff", help = "Use Katz back-off models")]
         backoff: bool,
 
+        #[arg(short = 'n', long = "no-cache", help = "Do not use a cached model")]
+        no_cache: bool,
+
         /// How many simple usernames to generate
         count: Option<usize>
     },

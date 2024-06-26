@@ -1,7 +1,8 @@
-use std::{fs::read_to_string, path::PathBuf};
+use std::{fs::read_to_string, path::PathBuf, str::from_utf8};
 
 use log::debug;
 use rand::{seq::SliceRandom, Rng};
+use zstd::bulk::decompress;
 
 type BoxedError<'a> = Box<dyn std::error::Error + Send + Sync + 'a>;
 type StringVecResult<'a> = Result<Vec<String>, BoxedError<'a>>;
@@ -24,19 +25,21 @@ pub fn load_wordlist<'a, R: Rng + Sized>(path: &PathBuf, delimiter: &str, rng: &
     Ok(wordlist)
 }
 
-pub fn load_default_wordlist<R: Rng + Sized>(rng: &mut R) -> Vec<String> {
-    let mut wordlist = include_str!("./wordlist.txt")
+pub fn load_default_wordlist<'a, R: Rng + Sized>(rng: &mut R) -> StringVecResult<'a> {
+    let buffer = include_bytes!("wordlist.txt.zst");
+    let bytes = decompress(buffer, 62144)?;
+    let mut wordlist = from_utf8(&bytes)?
         .split('\n')
         .map(|value| value.to_owned())
         .filter(|value| !value.is_empty())
         .collect::<Vec<_>>();
     let count = wordlist.len();
 
-    assert_eq!(count, 7776);
-
     wordlist.shuffle(rng);
+
+    assert_eq!(count, 7776);
 
     debug!("Loaded {count} words from the default wordlist");
 
-    wordlist
+    Ok(wordlist)
 }

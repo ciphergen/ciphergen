@@ -25,6 +25,7 @@ use rand::{thread_rng, prelude::SliceRandom};
 use visualize::visualize;
 use wordlist::{load_default_wordlist, load_wordlist};
 use panic::setup_panic;
+use zstd::{Decoder, Encoder};
 
 type BoxedError<'a> = Box<dyn std::error::Error + Send + Sync + 'a>;
 type UnitResult<'a> = Result<(), BoxedError<'a>>;
@@ -35,6 +36,7 @@ type GeneratorResult<'a> = Result<Generator, BoxedError<'a>>;
 const QUALIFIER: &str = "io.github";
 const ORGANIZATION: &str = "ciphergen";
 const APPLICATION: &str = "ciphergen";
+const MODEL_FILE_NAME: &str = "model.bin.zst";
 
 /// Read data from a file or STDIN
 fn read_in<'a>(path: Option<PathBuf>) -> VecByteResult<'a> {
@@ -75,7 +77,7 @@ fn get_character_set(numbers: bool, symbols: bool) -> Vec<char> {
 fn get_wordlist<'a, R: Rng + Sized>(path: Option<PathBuf>, delimiter: &str, rng: &mut R) -> VecStringResult<'a> {
     let wordlist = match path {
         Some(path) => load_wordlist(&path, &delimiter, rng)?,
-        None => load_default_wordlist(rng),
+        None => load_default_wordlist(rng)?,
     };
 
     Ok(wordlist)
@@ -84,72 +86,86 @@ fn get_wordlist<'a, R: Rng + Sized>(path: Option<PathBuf>, delimiter: &str, rng:
 fn get_corpus<'a, R: Rng + Sized>(path: Option<PathBuf>, rng: &mut R) -> VecStringResult<'a> {
     let corpus = match path {
         Some(path) => load_corpus(&path, rng)?,
-        None => load_default_corpus(rng)
+        None => load_default_corpus(rng)?
     };
 
     Ok(corpus)
 }
 
-fn read_file<'a>(path: PathBuf) -> GeneratorResult<'a> {
-    let mut file = File::options()
+fn read_generator<'a>(path: &PathBuf) -> GeneratorResult<'a> {
+    let file = File::options()
         .read(true)
-        .open(path.clone())?;
-
+        .open(path)?;
+    let mut decoder = Decoder::new(file)?;
     let mut buffer = Vec::<u8>::new();
 
-    file.read_to_end(&mut buffer)?;
+    decoder.read_to_end(&mut buffer)?;
 
     let generator = deserialize::<Generator>(&buffer)?;
 
     Ok(generator)
 }
 
-fn build_generator<'a>(path: &PathBuf, corpus: &[String], order: usize, prior: f64, backoff: bool) -> GeneratorResult<'a> {
-    warn!("Building model; this may take awhile...");
-
-    let generator = Generator::new(&corpus, order, prior, backoff);
+fn write_generator<'a>(path: &PathBuf, generator: &Generator) -> UnitResult<'a> {
     let buffer = serialize(&generator)?;
-    let mut file = File::options()
+    let file = File::options()
         .create(true)
         .write(true)
         .truncate(true)
         .open(path.clone())?;
+    let mut encoder = Encoder::new(file, 3)?.auto_finish();
 
-    file.write_all(&buffer)?;
+    encoder.write_all(&buffer)?;
 
-    debug!("Wrote cached model file to {path:#?}");
+    debug!("Wrote model file to cache at {path:#?}");
 
-    Ok(generator)
+    Ok(())
 }
 
-fn get_generator<'a>(corpus_path: Option<PathBuf>, order: usize, prior: f64, backoff: bool) -> GeneratorResult<'a> {
-    let project_dir = ProjectDirs::from(QUALIFIER, ORGANIZATION, APPLICATION)
-        .ok_or("Failed to find cache path on filesystem")?;
-    let cache_dir = project_dir.cache_dir();
+fn get_generator<'a>(corpus_path: Option<PathBuf>, order: usize, prior: f64, backoff: bool, no_cache: bool) -> GeneratorResult<'a> {
+    let generator = if no_cache {
+        let mut rng = thread_rng();
+        let corpus = get_corpus(corpus_path, &mut rng)?;
 
-    create_dir_all(cache_dir)?;
+        warn!("Building model because caching is disabled; this may take awhile...");
 
-    let cache_path = &cache_dir.join("model.bin");
-    let generator = match read_file(cache_path.clone()) {
-        Ok(generator) => {
-            debug!("Using cached model file at {cache_path:#?}");
+        Generator::new(&corpus, order, prior, backoff)
+    }
+    else {
+        let project_dir = ProjectDirs::from(QUALIFIER, ORGANIZATION, APPLICATION)
+            .ok_or("Failed to find cache path on filesystem")?;
+        let cache_dir = project_dir.cache_dir();
+        let cache_path = &cache_dir.join(MODEL_FILE_NAME);
 
-            generator
-        },
-        Err(error) => {
-            trace!("{error:#}");
+        create_dir_all(cache_dir)?;
 
-            let mut rng = thread_rng();
-            let corpus = get_corpus(corpus_path, &mut rng)?;
+        match read_generator(cache_path) {
+            Ok(generator) => {
+                debug!("Using cached model file at {cache_path:#?}");
 
-            build_generator(cache_path, &corpus, order, prior, backoff)?
+                generator
+            },
+            Err(error) => {
+                trace!("{error:#}");
+
+                let mut rng = thread_rng();
+                let corpus = get_corpus(corpus_path, &mut rng)?;
+
+                warn!("Building model because cache is missing; this may take awhile...");
+
+                let generator = Generator::new(&corpus, order, prior, backoff);
+
+                write_generator(cache_path, &generator)?;
+
+                generator
+            }
         }
     };
 
     Ok(generator)
 }
 
-fn main() -> UnitResult<'static> {
+fn execute() -> UnitResult<'static> {
     let arguments = parse();
 
     setup_panic();
@@ -191,9 +207,9 @@ fn main() -> UnitResult<'static> {
                     => spawn(move || create_digits(sender, length, count)),
                 GenerateCommands::Number { minimum, maximum, count }
                     => spawn(move || create_number(sender, minimum, maximum, count)),
-                GenerateCommands::Markov { capitalize, path, order, prior, backoff, count }
+                GenerateCommands::Markov { capitalize, path, order, prior, backoff, no_cache, count }
                     => {
-                        let generator = get_generator(path, order, prior, backoff)?;
+                        let generator = get_generator(path, order, prior, backoff, no_cache)?;
 
                         spawn(move || create_markov(sender, capitalize, generator, count))
                     }
@@ -237,4 +253,10 @@ fn main() -> UnitResult<'static> {
     }
 
     Ok(())
+}
+
+fn main() {
+    if let Err(error) = execute() {
+        panic!("{error}");
+    }
 }
