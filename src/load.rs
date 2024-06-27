@@ -131,7 +131,7 @@ pub fn get_generator<'a>(corpus_path: Option<PathBuf>, model_parameters: (usize,
 
         let generator = Generator::new(&corpus, order, prior, backoff);
 
-        debug!("\n{generator}");
+        trace!("\n{generator}");
 
         return Ok(generator);
     };
@@ -143,7 +143,7 @@ pub fn get_generator<'a>(corpus_path: Option<PathBuf>, model_parameters: (usize,
 
         let generator = Generator::new(&corpus, order, prior, backoff);
 
-        debug!("\n{generator}");
+        trace!("\n{generator}");
 
         write_generator(cache_path, &generator)?;
 
@@ -153,7 +153,7 @@ pub fn get_generator<'a>(corpus_path: Option<PathBuf>, model_parameters: (usize,
     let generator = match read_generator(cache_path) {
         Ok(generator) => {
             debug!("Using cached model file at {cache_path:#?}");
-            debug!("\n{generator}");
+            trace!("\n{generator}");
 
             generator
         },
@@ -166,7 +166,7 @@ pub fn get_generator<'a>(corpus_path: Option<PathBuf>, model_parameters: (usize,
 
             let generator = Generator::new(&corpus, order, prior, backoff);
 
-            debug!("\n{generator}");
+            trace!("\n{generator}");
 
             write_generator(cache_path, &generator)?;
 
