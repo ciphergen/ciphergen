@@ -20,6 +20,7 @@ pub fn load_corpus<'a>(path: &PathBuf) -> VecStringResult<'a> {
     let count = corpus.len();
 
     corpus.sort();
+    corpus.dedup();
 
     if corpus.is_empty() { return Err(format!("The corpus at {path:?} contains no words").into()); }
 
@@ -36,6 +37,7 @@ pub fn load_default_corpus<'a>() -> VecStringResult<'a> {
     let count = corpus.len();
 
     corpus.sort();
+    corpus.dedup();
 
     debug!("Loaded {count} words from the default corpus");
 

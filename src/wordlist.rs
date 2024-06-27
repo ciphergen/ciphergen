@@ -16,6 +16,8 @@ pub fn load_wordlist<'a, R: Rng + Sized>(path: &PathBuf, delimiter: &str, rng: &
         .collect::<Vec<_>>();
     let count = wordlist.len();
 
+    wordlist.sort();
+    wordlist.dedup();
     wordlist.shuffle(rng);
 
     if wordlist.is_empty() { return Err(format!("The wordlist at {path:?} contains no words").into()); }
@@ -35,6 +37,8 @@ pub fn load_default_wordlist<'a, R: Rng + Sized>(rng: &mut R) -> StringVecResult
         .collect::<Vec<_>>();
     let count = wordlist.len();
 
+    wordlist.sort();
+    wordlist.dedup();
     wordlist.shuffle(rng);
 
     assert_eq!(count, 7776);
