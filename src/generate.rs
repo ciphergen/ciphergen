@@ -67,6 +67,6 @@ pub fn create_number(sender: Sender<Vec<u8>>, minimum: usize, maximum: usize, co
     create_parallel(sender, count, || generate_number(minimum, maximum));
 }
 
-pub fn create_markov(sender: Sender<Vec<u8>>, capitalize: bool, generator: Generator, count: Option<usize>) {
-    create_parallel(sender, count, || generate_markov(generator.clone(), capitalize, &mut thread_rng()));
+pub fn create_markov(sender: Sender<Vec<u8>>, generator: &Generator, capitalize: bool, minimum: usize, maximum: usize, count: Option<usize>) {
+    create_parallel(sender, count, || generate_markov(generator, capitalize, minimum, maximum, &mut thread_rng()));
 }

@@ -1,8 +1,9 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, fmt::Display};
 
+use hex::encode;
 use rand::Rng;
 use serde::{Deserialize, Serialize};
-use sha2::{Sha512, Digest};
+use sha2::{Sha256, Digest};
 
 pub trait MarkovModel {
     /// Creates a new Markov model.
@@ -14,6 +15,72 @@ pub trait MarkovModel {
 
     /// Attempts to generate the next letter in the word given the `context` (the previous "order" letters).
     fn generate<R: Rng + Sized>(&self, context: &String, rng: &mut R) -> Option<String>;
+
+    /// Calculates the CID of this model.
+    fn calculate_checksum(&self) -> Vec<u8>;
+}
+
+trait IntoBytes {
+    fn into_bytes(&self) -> Vec<u8>;
+}
+
+impl IntoBytes for Vec<String> {
+    fn into_bytes(&self) -> Vec<u8> {
+        self.iter()
+            .map(|value| value.to_owned().into_bytes())
+            .flatten()
+            .collect::<Vec<_>>()
+    }
+}
+
+impl IntoBytes for Vec<char> {
+    fn into_bytes(&self) -> Vec<u8> {
+        self.iter()
+            .collect::<String>()
+            .into_bytes()
+    }
+}
+
+impl IntoBytes for HashMap<String, Vec<String>> {
+    fn into_bytes(&self) -> Vec<u8> {
+        self.iter()
+            .map(|(key, value)| {
+                let mut buffer = Vec::<u8>::new();
+                let mut key = key.to_owned().into_bytes();
+                let mut value = value.iter()
+                    .map(|value| value.to_owned().into_bytes())
+                    .flatten()
+                    .collect::<Vec<_>>();
+
+                buffer.append(&mut key);
+                buffer.append(&mut value);
+
+                buffer
+            })
+            .flatten()
+            .collect::<Vec<_>>()
+    }
+}
+
+impl IntoBytes for HashMap<String, Vec<f64>> {
+    fn into_bytes(&self) -> Vec<u8> {
+        self.iter()
+            .map(|(key, value)| {
+                let mut buffer = Vec::<u8>::new();
+                let mut key = key.to_owned().into_bytes();
+                let mut value = value.iter()
+                    .map(|value| value.to_le_bytes())
+                    .flatten()
+                    .collect::<Vec<_>>();
+
+                    buffer.append(&mut key);
+                    buffer.append(&mut value);
+
+                buffer
+            })
+            .flatten()
+            .collect::<Vec<_>>()
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -24,6 +91,29 @@ pub struct Model {
     alphabet: Vec<char>,
     observations: HashMap<String, Vec<String>>,
     chains: HashMap<String, Vec<f64>>
+}
+
+impl Display for Model {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let cid = encode(self.calculate_checksum());
+        let order = self.order.to_string();
+        let prior = self.prior.to_string();
+        let alphabet = self.alphabet.len().to_string();
+        let observations = self.observations.len().to_string();
+        let chains = self.chains.len().to_string();
+
+        write!(
+            formatter,
+            "\tModel {{ \
+            \n\t\t\tCID: {cid} \
+            \n\t\t\tOrder: {order} \
+            \n\t\t\tPrior: {prior} \
+            \n\t\t\tAlphabet: {alphabet} \
+            \n\t\t\tObservations: {observations} \
+            \n\t\t\tChains: {chains} \
+            \n\t\t}}"
+        )
+    }
 }
 
 impl MarkovModel for Model {
@@ -59,6 +149,25 @@ impl MarkovModel for Model {
             None => None
         }
     }
+
+    fn calculate_checksum(&self) -> Vec<u8> {
+        let mut digest = Sha256::new();
+        let data = self.data.into_bytes();
+        let order = self.order.to_le_bytes();
+        let prior = self.prior.to_le_bytes();
+        let alphabet = self.alphabet.into_bytes();
+        let observations = self.observations.into_bytes();
+        let chains = self.chains.into_bytes();
+
+        digest.update(data);
+        digest.update(order);
+        digest.update(prior);
+        digest.update(alphabet);
+        digest.update(observations);
+        digest.update(chains);
+
+        digest.finalize().to_vec()
+    }
 }
 
 impl Model {
@@ -71,7 +180,7 @@ impl Model {
             value = "#".to_string().repeat(self.order) + &value + "#";
 
             for index in 0..value.len() - self.order {
-                let key = value[index..index + self.order].to_string();
+                let key = value[index..index + self.order].to_owned();
                 let character = value.chars().nth(index + self.order).unwrap().to_string();
 
                 match self.observations.get_mut(&key) {
@@ -102,23 +211,6 @@ impl Model {
                 }
             }
         }
-    }
-
-    #[allow(dead_code)]
-    fn calculate_checksum(&self) -> Vec<u8> {
-        let mut digest = Sha512::new();
-        let data = self.data.iter()
-            .map(|value| value.to_owned().into_bytes())
-            .flatten()
-            .collect::<Vec<_>>();
-        let order = self.order.to_le_bytes();
-        let prior = self.prior.to_le_bytes();
-
-        digest.update(data);
-        digest.update(order);
-        digest.update(prior);
-
-        digest.finalize().to_vec()
     }
 }
 

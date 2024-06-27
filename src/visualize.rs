@@ -29,7 +29,7 @@ pub fn visualize<'a, W: Write>(writer: W, data: &[u8]) -> UnitResult<'a> {
     let resolution = (size as f64).sqrt().ceil();
     let (width, height) = (resolution as u32, resolution as u32);
 
-    debug!("\nSize: {}\nResolution: {width}x{height}", ByteSize(size));
+    debug!("\n\tSize: {}\n\tResolution: {width}x{height}", ByteSize(size));
 
     let mut encoder = Encoder::new(writer, width, height);
 

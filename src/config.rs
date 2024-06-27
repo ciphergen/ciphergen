@@ -135,25 +135,22 @@ pub enum GenerateCommands {
     },
     /// Generate a random word using a Markov model
     Markov {
-        #[arg(short = 'c', long = "capitalize", help = "Make the first letter uppercase")]
+        #[arg(short = 'C', long = "no-capitalize", help = "Do not capitalize words", action = ArgAction::SetFalse)]
         capitalize: bool,
 
         #[arg(short = 'i', long = "input", help = "A path to a file containing a corpus to use")]
         path: Option<PathBuf>,
 
-        #[arg(short = 'o', long = "order", help = "The model ordering to use", default_value = "3")]
-        order: usize,
+        #[command(flatten)]
+        length_range: LengthRange,
 
-        #[arg(short = 'p', long = "prior", help = "The model ordering to use", default_value = "0.0")]
-        prior: f64,
+        #[command(flatten)]
+        model_parameters: ModelParameters,
 
-        #[arg(short = 'b', long = "backoff", help = "Use Katz back-off models")]
-        backoff: bool,
+        #[command(flatten)]
+        cache_control: CacheControl,
 
-        #[arg(short = 'n', long = "no-cache", help = "Do not use a cached model")]
-        no_cache: bool,
-
-        /// How many simple usernames to generate
+        /// How many words to generate
         count: Option<usize>
     },
 }
@@ -178,6 +175,39 @@ pub enum UsernameCommands {
     }
 }
 
+#[derive(Args)]
+#[group(multiple = true)]
+pub struct LengthRange {
+    #[arg(short = 'm', long = "min", help = "The minimum length of the word", default_value = "2")]
+    pub minimum: usize,
+
+    #[arg(short = 'M', long = "max", help = "The maximum length of the word", default_value = "10")]
+    pub maximum: usize
+}
+
+#[derive(Args)]
+#[group(multiple = true)]
+pub struct ModelParameters {
+    #[arg(short = 'o', long = "order", help = "The model ordering to use", default_value = "3")]
+    pub order: usize,
+
+    #[arg(short = 'p', long = "prior", help = "The Dirichlet probability of picking any random letter", default_value = "0.0")]
+    pub prior: f64,
+
+    #[arg(short = 'b', long = "backoff", help = "Use Katz back-off model")]
+    pub backoff: bool
+}
+
+#[derive(Args)]
+#[group(multiple = false)]
+pub struct CacheControl {
+    #[arg(short = 'N', long = "no-cache", help = "Do not use a cached model")]
+    pub no_cache: bool,
+
+    #[arg(short = 'R', long = "rebuild-cache", help = "Rebuild the cached model")]
+    pub rebuild_cache: bool
+}
+
 impl Verbosity {
     fn to_filter(&self) -> LevelFilter {
         if self.debug { LevelFilter::Trace }
@@ -200,6 +230,7 @@ pub fn setup_logging<'a>(verbosity: &Verbosity) -> UnitResult<'a> {
         .format_target(false)
         .format_module_path(false)
         .format_timestamp_secs()
+        .format_indent(None)
         .parse_default_env()
         .try_init()?;
 

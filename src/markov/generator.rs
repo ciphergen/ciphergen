@@ -1,5 +1,9 @@
+use std::fmt::Display;
+
+use hex::encode;
 use rand::Rng;
 use serde::{Deserialize, Serialize};
+use sha2::{Sha256, Digest};
 
 use super::model::{MarkovModel, Model};
 
@@ -9,12 +13,35 @@ pub trait MarkovGenerator {
 
     /// Generates a word.
     fn generate<R: Rng + Sized>(&self, rng: &mut R) -> String;
+
+    /// Calculates the CID of all models in this generator.
+    fn calculate_checksum(&self) -> Vec<u8>;
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct Generator {
     order: usize,
     models: Vec<Model>
+}
+
+impl Display for Generator {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let cid = encode(self.calculate_checksum());
+        let models = self.models.iter()
+            .map(|model| model.to_string())
+            .collect::<Vec<_>>()
+            .join("\n");
+
+        write!(
+            formatter,
+            "Generator {{ \
+            \n\tCID: {cid} \
+            \n\tModels: [ \
+            \n\t{models} \
+            \n\t] \
+            \n}}"
+        )
+    }
 }
 
 impl MarkovGenerator for Generator {
@@ -56,6 +83,16 @@ impl MarkovGenerator for Generator {
         };
 
         word
+    }
+
+    fn calculate_checksum(&self) -> Vec<u8> {
+        let mut digest = Sha256::new();
+
+        self.models.iter()
+            .map(|model| model.calculate_checksum())
+            .for_each(|checksum| digest.update(checksum));
+
+        digest.finalize().to_vec()
     }
 }
 
